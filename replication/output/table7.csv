@@ -1,0 +1,21 @@
+table,panel,row,col,estimate,stars,units
+7,"",CAPM Beta,Winner Mean,1.14794730529318,"",beta
+7,"",CAPM Beta,Winner Median,0.922453203070481,"",beta
+7,"",CAPM Beta,Loser Mean,1.11441104034806,"",beta
+7,"",CAPM Beta,Loser Median,0.96837449573848,"",beta
+7,"",CAPM Beta,Mean t-test Loser - Winner,-0.0335362649451185,"",beta
+7,"",FF3F Mkt Beta,Winner Mean,1.1568989109475,"",beta
+7,"",FF3F Mkt Beta,Winner Median,0.945313336248739,"",beta
+7,"",FF3F Mkt Beta,Loser Mean,1.17173010615872,"",beta
+7,"",FF3F Mkt Beta,Loser Median,1.01015806573709,"",beta
+7,"",FF3F Mkt Beta,Mean t-test Loser - Winner,0.0148311952112203,"",beta
+7,"",FF3F SMB Beta,Winner Mean,0.369483236235889,"",beta
+7,"",FF3F SMB Beta,Winner Median,0.291045536129695,"",beta
+7,"",FF3F SMB Beta,Loser Mean,0.231905179595277,"",beta
+7,"",FF3F SMB Beta,Loser Median,0.16829022034047,"",beta
+7,"",FF3F SMB Beta,Mean t-test Loser - Winner,-0.137578056640612,"",beta
+7,"",FF3F HML Beta,Winner Mean,-0.0553320777061076,"",beta
+7,"",FF3F HML Beta,Winner Median,-0.171431896338145,"",beta
+7,"",FF3F HML Beta,Loser Mean,0.312895949591989,"",beta
+7,"",FF3F HML Beta,Loser Median,0.392604306653347,"",beta
+7,"",FF3F HML Beta,Mean t-test Loser - Winner,0.368228027298097,*,beta

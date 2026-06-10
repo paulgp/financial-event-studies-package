@@ -1,0 +1,107 @@
+Part A: reading stacked gsynth output (sc_ma_1_7052.dta) ... 
+  gsynth runs (permno x ann_tdate): 14618 over 6625 announcement dates 
+  deal-level sample: N = 14847 (published 14,847) 
+  recomputed vs saved car_log_sc_1: matched 14847/14847, max |diff| = 9.99e-08 
+  wrote output/table6.csv 
+  wrote output/table6_comparison.csv 
+            row             col target_pct estimate_pct n_target     n
+         <char>          <char>      <num>        <num>    <int> <int>
+ 1: Market mean     Cash merger        1.1        1.093     9261  9261
+ 2: Market mean     Full sample        0.8        0.825    14847 14847
+ 3: Market mean   Other targets        1.6        1.565     4520  4520
+ 4: Market mean Private targets        1.3        1.275     7030  7030
+ 5: Market mean  Public targets       -1.2       -1.151     3297  3297
+ 6: Market mean    Stock merger        0.4        0.381     5592  5592
+ 7: Gsynth mean     Cash merger        1.0        0.957     9261  9261
+ 8: Gsynth mean     Full sample        0.7        0.658    14847 14847
+ 9: Gsynth mean   Other targets        1.5        1.464     4520  4520
+10: Gsynth mean Private targets        1.0        1.048     7030  7030
+11: Gsynth mean  Public targets       -1.3       -1.279     3297  3297
+12: Gsynth mean    Stock merger        0.2        0.163     5592  5592
+    ok_estimate   ok_n
+         <lgcl> <lgcl>
+ 1:        TRUE   TRUE
+ 2:        TRUE   TRUE
+ 3:        TRUE   TRUE
+ 4:        TRUE   TRUE
+ 5:        TRUE   TRUE
+ 6:        TRUE   TRUE
+ 7:        TRUE   TRUE
+ 8:        TRUE   TRUE
+ 9:        TRUE   TRUE
+10:        TRUE   TRUE
+11:        TRUE   TRUE
+12:        TRUE   TRUE
+Part A: 12/12 cells within tolerance, 12/12 Ns exact 
+Part B: reading CRSP daily (4.3GB; this takes a few minutes) ... 
+  implied 3-day market log-return spread within announcement date: 
+    max spread = 5.87e-08 across 6625 dates (3851 dates with >1 deal) 
+  treated-side rebuild consistent with saved market CARs: YES 
+Part C: live gsynth validation via feventr 
+  validation dates (date_index / ann_tdate): 356/1986-12-29, 2341/1997-03-25, 4992/2009-05-29, 6288/2017-07-07 
+  [1/4] date_index 356 (1986-12-29): 4530 units (1 treated), fitting gsynth ... 
+Cross-validating ... 
+ r = 1; sigma2 = 0.00153; IC = -6.42246; PC = 0.00155; MSPE = 0.00019*
+ r = 2; sigma2 = 0.00150; IC = -6.41304; PC = 0.00153; MSPE = 0.00028
+ r = 3; sigma2 = 0.00148; IC = -6.39581; PC = 0.00152; MSPE = 0.00028
+ r = 4; sigma2 = 0.00146; IC = -6.37576; PC = 0.00152; MSPE = 0.00028
+ r = 5; sigma2 = 0.00145; IC = -6.35476; PC = 0.00153; MSPE = 0.00028
+ r = 6; sigma2 = 0.00144; IC = -6.33312; PC = 0.00153; MSPE = 0.00029
+ r = 7; sigma2 = 0.00143; IC = -6.30977; PC = 0.00153; MSPE = 0.00029
+ r = 8; sigma2 = 0.00141; IC = -6.28624; PC = 0.00154; MSPE = 0.00029
+ r = 9; sigma2 = 0.00141; IC = -6.26206; PC = 0.00154; MSPE = 0.00029
+ r = 10; sigma2 = 0.00140; IC = -6.23719; PC = 0.00155; MSPE = 0.00029
+
+ r* = 1
+
+    r.cv=1  cor=1.000000  MAE=1.40e-10  3d CAR: feventr -0.035611 vs saved -0.035611 (10.8s) 
+  [2/4] date_index 2341 (1997-03-25): 5670 units (1 treated), fitting gsynth ... 
+Cross-validating ... 
+ r = 1; sigma2 = 0.00203; IC = -6.14335; PC = 0.00204; MSPE = 0.00092*
+ r = 2; sigma2 = 0.00199; IC = -6.13010; PC = 0.00203; MSPE = 0.00092
+ r = 3; sigma2 = 0.00197; IC = -6.10731; PC = 0.00203; MSPE = 0.00093
+ r = 4; sigma2 = 0.00196; IC = -6.08399; PC = 0.00204; MSPE = 0.00094
+ r = 5; sigma2 = 0.00195; IC = -6.06035; PC = 0.00205; MSPE = 0.00094
+ r = 6; sigma2 = 0.00193; IC = -6.03618; PC = 0.00205; MSPE = 0.00095
+ r = 7; sigma2 = 0.00192; IC = -6.01148; PC = 0.00206; MSPE = 0.00094
+ r = 8; sigma2 = 0.00191; IC = -5.98639; PC = 0.00207; MSPE = 0.00095
+ r = 9; sigma2 = 0.00190; IC = -5.96076; PC = 0.00208; MSPE = 0.00096
+ r = 10; sigma2 = 0.00189; IC = -5.93487; PC = 0.00209; MSPE = 0.00097
+
+ r* = 1
+
+    r.cv=1  cor=1.000000  MAE=1.52e-10  3d CAR: feventr -0.106488 vs saved -0.106488 (11.4s) 
+  [3/4] date_index 4992 (2009-05-29): 3739 units (1 treated), fitting gsynth ... 
+Cross-validating ... 
+ r = 1; sigma2 = 0.00272; IC = -5.84717; PC = 0.00275; MSPE = 0.00317*
+ r = 2; sigma2 = 0.00253; IC = -5.88925; PC = 0.00258; MSPE = 0.00357
+ r = 3; sigma2 = 0.00245; IC = -5.89062; PC = 0.00253; MSPE = 0.00366
+ r = 4; sigma2 = 0.00240; IC = -5.88016; PC = 0.00250; MSPE = 0.00435
+ r = 5; sigma2 = 0.00237; IC = -5.86350; PC = 0.00249; MSPE = 0.00398
+ r = 6; sigma2 = 0.00234; IC = -5.84279; PC = 0.00249; MSPE = 0.00397
+ r = 7; sigma2 = 0.00232; IC = -5.82168; PC = 0.00249; MSPE = 0.00391
+ r = 8; sigma2 = 0.00230; IC = -5.79991; PC = 0.00250; MSPE = 0.00402
+ r = 9; sigma2 = 0.00228; IC = -5.77789; PC = 0.00250; MSPE = 0.00407
+ r = 10; sigma2 = 0.00226; IC = -5.75528; PC = 0.00250; MSPE = 0.00303
+
+ r* = 10
+
+    r.cv=10  cor=1.000000  MAE=6.12e-10  3d CAR: feventr 0.214501 vs saved 0.214501 (8.2s) 
+  [4/4] date_index 6288 (2017-07-07): 3156 units (1 treated), fitting gsynth ... 
+Cross-validating ... 
+ r = 1; sigma2 = 0.00132; IC = -6.57525; PC = 0.00133; MSPE = 0.00020*
+ r = 2; sigma2 = 0.00127; IC = -6.57756; PC = 0.00130; MSPE = 0.00020
+ r = 3; sigma2 = 0.00123; IC = -6.58003; PC = 0.00127; MSPE = 0.00020
+ r = 4; sigma2 = 0.00120; IC = -6.57303; PC = 0.00125; MSPE = 0.00020
+ r = 5; sigma2 = 0.00117; IC = -6.56217; PC = 0.00124; MSPE = 0.00020
+ r = 6; sigma2 = 0.00115; IC = -6.55058; PC = 0.00123; MSPE = 0.00020
+ r = 7; sigma2 = 0.00113; IC = -6.53893; PC = 0.00122; MSPE = 0.00020
+ r = 8; sigma2 = 0.00111; IC = -6.52719; PC = 0.00121; MSPE = 0.00021
+ r = 9; sigma2 = 0.00109; IC = -6.51098; PC = 0.00120; MSPE = 0.00021
+ r = 10; sigma2 = 0.00108; IC = -6.49316; PC = 0.00120; MSPE = 0.00022
+
+ r* = 1
+
+    r.cv=1  cor=1.000000  MAE=1.66e-10  3d CAR: feventr 0.011808 vs saved 0.011808 (6.8s) 
+  wrote output/table6_gsynth_validation.csv 
+Done. 

@@ -1,0 +1,13 @@
+"row","col","estimate_pct","n"
+"Market mean","Full sample",0.824736240439561,14847
+"Gsynth mean","Full sample",0.657885635553093,14847
+"Market mean","Public targets",-1.15103440757598,3297
+"Gsynth mean","Public targets",-1.27884789904872,3297
+"Market mean","Private targets",1.27539832026988,7030
+"Gsynth mean","Private targets",1.04801748975044,7030
+"Market mean","Other targets",1.56499318851499,4520
+"Gsynth mean","Other targets",1.4638111949723,4520
+"Market mean","Cash merger",1.09282584508115,9261
+"Gsynth mean","Cash merger",0.957223267502616,9261
+"Market mean","Stock merger",0.381072944313266,5592
+"Gsynth mean","Stock merger",0.163415725942051,5592

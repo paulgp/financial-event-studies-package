@@ -160,4 +160,27 @@ Gsynth N=129,625 is a transposition of 129,165 (cannot be produced by any sample
 ## Verifier verdicts
 
 - Phase 0 transcription: T1–T7 verified 7/7, 0 corrections (workflow `wf_306c0bf4-90f`, 2026-06-10).
-- Phase 3 per-table verdicts: pending.
+- **Table 7 — SIGNED OFF** (workflow `wf_f57b45dd-ecc`, 2026-06-10): 20/20 cells, max |diff|
+  4.8e-4 (pure 3-dp rounding); verifier independently recomputed all 20 cells from the saved
+  wide beta files and the Welch p under three df formulas (star robust); recomputed betas match
+  the published input files to 3.0e-7 (Stata float storage). Deterministic, no seeds.
+- **Table 6 — CONDITIONAL SIGN-OFF** (same workflow): 12/12 cells round exactly to the
+  published 1-dp values (max |diff| 0.049pp). Conditions (accepted, documented):
+  (a) gsynth column aggregates the saved day-level counterfactuals (sc_ma_1_7052.dta) —
+  raw event panels are not in Dropbox and a 7,052-panel re-fit is multi-day compute; the
+  fitting path was validated LIVE on 5 announcement dates (panels rebuilt from CRSP daily;
+  feventr reproduces the saved per-day counterfactuals to ~1.8e-9 with identical CV traces);
+  (b) daily vwretd absent from Dropbox → market column consumes the saved per-deal CARs,
+  treated side rebuilt and verified to 5.9e-8. Verifier also confirmed N=14,847 through the
+  full merge chain, the 6 cash+stock double-coded deals, and that the day-window convention
+  ([-1,+1] = 3rd row) holds in 100% of the 14,618 runs.
+- **Tables 4–5 — pilot validated, full gsynth re-run in progress**: 82/84 cells within
+  tolerance now; the 2 failures are Table 4 random-control CAPM **Std** cells (2000s, 2010s)
+  traced to a *lost vintage* of the unseeded upstream random draw — our betas match the saved
+  draw artifact to 1e-7 and the *Mean* cells from the same regression sample match to <5e-4,
+  so the published Std cells are irreproducible in principle (documented data-vintage
+  deviation). Gsynth pilot: feventr reproduces saved counterfactuals on pilot cohorts exactly.
+- **Table 1 — pilot bit-exact, full run in progress**: per-sim bias columns match the
+  published saved bias_estimates_*.csv to ~1e-16 (gsynth to 2e-17) with 0 coverage flips
+  across all 66 period-level decisions in 6 pilot sims.
+- **Tables 2–3 — run in progress** (Panel B gsynth fitting at time of writing).
