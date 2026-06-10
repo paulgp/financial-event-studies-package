@@ -30,3 +30,25 @@ inf_tstat <- function(Y, N0, T0, eng, method) {
   list(att = att_se, avg = avg_se, df = df, method = "tstat",
        reps = NULL, draws = NULL)
 }
+
+# Placebo inference (Arkhangelsky et al. 2021 style, as in Stata sdid
+# vce(placebo)): repeatedly reassign treatment to a random subset of the
+# donors (same number as actually treated), refit the estimator on donors
+# only, and use the dispersion of the placebo estimates as the SE.
+inf_placebo <- function(Y, N0, T0, n_treated, refit, reps = 100, seed = NULL) {
+  if (N0 <= n_treated)
+    stop("placebo inference needs more donors than treated units")
+  if (!is.null(seed)) set.seed(seed)
+  Tpost <- ncol(Y) - T0
+  draws <- matrix(NA_real_, reps, Tpost)
+  for (k in seq_len(reps)) {
+    fake <- sample.int(N0, n_treated)
+    Yp <- rbind(Y[setdiff(seq_len(N0), fake), , drop = FALSE],
+                Y[fake, , drop = FALSE])
+    draws[k, ] <- refit(Yp, N0 - n_treated, T0)$tau
+  }
+  avg <- rowMeans(draws)
+  list(att = apply(draws, 2L, stats::sd),
+       avg = stats::sd(avg),
+       df = reps - 1L, method = "placebo", reps = reps, draws = draws)
+}

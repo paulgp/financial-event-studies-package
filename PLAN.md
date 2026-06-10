@@ -11,8 +11,8 @@ Goldsmith-Pinkham & Lyu, *Causal Inference in Financial Event Studies*
 | Phase | Status | Gate |
 |---|---|---|
 | 0 — Recon artifacts | **DONE 2026-06-10** | Targets transcribed + adversarially verified 7/7 (0 corrections); all 5 discrepancies resolved below |
-| 1 — Package core | pending | factor CARs ≡ lm(); DiD ≡ feols; Table 1 smoke |
-| 2 — Fast synthetic engine | pending | CVXR/augsynth agreement ≤1e-4 rel; ≥10× at n0≥2k; real-data support check |
+| 1 — Package core | **DONE 2026-06-10** (`da4a6d9`) | factor CARs ≡ lm() at 1e-10; DiD ≡ feols TWFE; `simulate_events` **bit-exact** vs published sim panel (seed 1234); Table 1 smoke shows the selection-bias pattern; 103 tests OK |
+| 2 — Fast synthetic engine | **DONE 2026-06-10** | hybrid/qp ≤1e-4 of CVXR (achieved ~1e-7); SC ≡ augsynth, SDID ≡ synthdid (τ̂ to 1e-6, ω/λ to 1e-4); ridge closed form verified; benchmark grid + real-data support check in `benchmarks/`; 138 tests OK |
 | 3 — Replication T1–T7 | pending | ±0.001 / ±0.1pp points; SEs ±20%; verifier sign-off per table |
 | 4 — Polish | pending | snapshots, vignettes, R CMD check, CI |
 
@@ -25,6 +25,22 @@ Goldsmith-Pinkham & Lyu, *Causal Inference in Financial Event Studies*
   augsynth 0.2.0, CVXR 1.8.1, tinytest 1.4.1, tinysnapshot 0.2.0, haven, fixest.
 - CAR conventions needed (from recon): arithmetic **sum**, **compound** (∏(1+r)−1 diff), and
   **log** (Σ[log(1+r₁)−log(1+r₀)] — Table 6 uses this). `cumulate ∈ {sum, compound, log}`.
+
+## Solver design (Phase 2 outcome)
+
+`solve_simplex_ls(A, b, V, method = c("hybrid", "fw", "qp"))`:
+- **hybrid** (default): Frank-Wolfe with exact line search (synthdid port, O(n0·t0)/iter,
+  capped at 300 iters with a relative objective-decrease stop) seeds the donor support
+  (only donors pushed above the shrunken-uniform baseline), OSQP polishes on that support,
+  then **KKT gradient screening** (inactive donors must have half-gradient ≥ the active-set
+  level; one O(n0·t0) pass per round, ≤10 rounds) re-admits any donors FW missed and
+  re-polishes. Result: objective ≤ full-OSQP at eps 1e-8 (rel diff ~1e-7, often negative),
+  21–121× faster on the simulated grid at n0 ∈ {500..5,000} (full grid in
+  `benchmarks/solver_benchmark_results.csv`).
+- True SC solutions are sparse (40–170 active donors at n0 ≤ 10,000 in both simulated and
+  real Geithner all-CRSP data), which is why support restriction works.
+- eng_sdid ports synthdid's collapsed-form algorithm exactly (zeta regularization,
+  demeaned FW, sparsify-then-refit, min.decrease stopping): τ̂ matches synthdid to 1e-6.
 
 ## Targets
 

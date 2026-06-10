@@ -1,0 +1,10 @@
+n0=  500 t0=100 | qp    0.45s | hybrid   0.02s (  21x, rel obj -2.4e-07, support 40) | fw   0.13s (rel +4.2e-02)
+n0= 2000 t0=100 | qp    2.17s | hybrid   0.08s (  29x, rel obj -2.6e-07, support 45) | fw   0.50s (rel +8.0e-02)
+n0= 5000 t0=100 | qp   23.51s | hybrid   0.20s ( 121x, rel obj -8.7e-10, support 71) | fw   1.24s (rel +1.3e-01)
+n0=10000 t0=100 | qp  186.13s | hybrid   0.42s ( 446x, rel obj -9.9e-06, support 82) | fw   2.41s (rel +8.5e-02)
+n0=  500 t0=250 | qp    0.08s | hybrid   0.06s (   1x, rel obj -9.7e-08, support 72) | fw   0.32s (rel +6.7e-02)
+n0= 2000 t0=250 | qp    2.07s | hybrid   0.19s (  11x, rel obj -7.5e-08, support 67) | fw   1.27s (rel +6.4e-02)
+n0= 5000 t0=250 | qp   20.98s | hybrid   0.49s (  42x, rel obj -8.9e-08, support 59) | fw   3.27s (rel +4.4e-02)
+n0=10000 t0=250 | qp  492.24s | hybrid   0.98s ( 504x, rel obj -8.7e-09, support 50) | fw   6.53s (rel +3.0e-02)
+
+GATE: PASS 

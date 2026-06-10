@@ -47,7 +47,3 @@ expect_true(abs(f1$att[["0"]] - sim$tau) < 0.02)
 # keep_data = FALSE drops the panel
 f2 <- do.call(feventr::event_study, c(args, list(method = "mean", keep_data = FALSE)))
 expect_null(f2$panel)
-
-# synthetic methods are Phase 2
-expect_error(do.call(feventr::event_study, c(args, list(method = "sc"))),
-             "Phase 2")

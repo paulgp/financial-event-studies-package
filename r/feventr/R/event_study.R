@@ -44,6 +44,8 @@
 #'   (Frank-Wolfe + support-restricted QP polish, default), `"fw"`, `"qp"`.
 #' @param lambda Ridge penalty for `"ridge"`; `NULL` = cross-validated.
 #' @param r Factor-number range for `"gsynth"` cross-validation.
+#' @param force Fixed effects for `"gsynth"`: `"unit"` (default), `"none"`,
+#'   or `"two-way"`.
 #' @param se Inference: `"auto"` maps mean/did/market/factor to `"tstat"`,
 #'   sc/ridge/sdid to `"placebo"`, gsynth to `"bootstrap"`. `"none"` skips.
 #' @param reps Placebo repetitions / bootstrap draws (`NULL` = method
@@ -61,7 +63,7 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                         factors = NULL, donors = NULL,
                         match_on = c("ret", "cumret"), V = NULL,
                         solver = c("hybrid", "fw", "qp"), lambda = NULL,
-                        r = c(0, 5),
+                        r = c(0, 5), force = c("unit", "none", "two-way"),
                         se = c("auto", "placebo", "bootstrap", "tstat", "none"),
                         reps = NULL, keep_data = TRUE, seed = NULL) {
   method <- match.arg(method)
@@ -81,15 +83,33 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                  window = window, est_window = est_window, donors = donors)
 
   F <- if (method %in% c("market", "factor")) align_factors(factors, time, p)
-  eng <- switch(method,
-    mean   = eng_mean(p$Y, p$N0, p$T0),
-    did    = eng_did(p$Y, p$N0, p$T0),
+  force <- match.arg(force)
+  # matching matrix for synthetic methods (recomputed per placebo draw)
+  mk_match <- if (match_on == "cumret") {
+    function(Y, N0, T0) {
+      A <- apply(Y[seq_len(N0), seq_len(T0), drop = FALSE], 1, cumsum)
+      structure(A, b = cumsum(colMeans(Y[-seq_len(N0), seq_len(T0), drop = FALSE])))
+    }
+  } else function(Y, N0, T0) NULL
+  refit <- switch(method,
+    mean   = function(Y, N0, T0) eng_mean(Y, N0, T0),
+    did    = function(Y, N0, T0) eng_did(Y, N0, T0),
     market = {
       if (ncol(F) != 1L) stop("method 'market' needs exactly one factor column")
-      eng_factor(p$Y, p$N0, p$T0, F, beta = 1)
+      function(Y, N0, T0) eng_factor(Y, N0, T0, F, beta = 1)
     },
-    factor = eng_factor(p$Y, p$N0, p$T0, F),
-    stop("method '", method, "' requires the synthetic engine (Phase 2)"))
+    factor = function(Y, N0, T0) eng_factor(Y, N0, T0, F),
+    sc     = function(Y, N0, T0)
+      eng_sc(Y, N0, T0, Ymatch = mk_match(Y, N0, T0), V = V, solver = solver),
+    ridge  = function(Y, N0, T0)
+      eng_ridge_sc(Y, N0, T0, Ymatch = mk_match(Y, N0, T0), V = V,
+                   lambda = lambda, solver = solver),
+    sdid   = function(Y, N0, T0) eng_sdid(Y, N0, T0),
+    gsynth = function(Y, N0, T0)
+      eng_gsynth(Y, N0, T0, r = r, force = force,
+                 se = identical(se, "bootstrap"),
+                 nboots = if (is.null(reps)) 1000L else reps))
+  eng <- refit(p$Y, p$N0, p$T0)
 
   post <- seq.int(p$T0 + 1L, ncol(p$Y))
   ev_times <- p$times[post]
@@ -98,9 +118,18 @@ event_study <- function(data, unit, time, ret, treated, event_time,
   car <- car_from_paths(treated_path[post], eng$y0hat[post], cumulate)
   names(att) <- names(car) <- ev_times
 
-  se_out <- if (se == "none") NULL
-            else if (se == "tstat") inf_tstat(p$Y, p$N0, p$T0, eng, method)
-            else stop("se = '", se, "' requires the synthetic engine (Phase 2)")
+  se_out <- switch(se,
+    none = NULL,
+    tstat = inf_tstat(p$Y, p$N0, p$T0, eng, method),
+    placebo = inf_placebo(p$Y, p$N0, p$T0, n_treated = length(p$treated),
+                          refit = refit,
+                          reps = if (is.null(reps)) 100L else reps,
+                          seed = seed),
+    bootstrap = {
+      if (method != "gsynth")
+        stop("se = 'bootstrap' is only available for method 'gsynth'")
+      eng$info$se
+    })
   if (!is.null(se_out) && !is.null(se_out$att)) names(se_out$att) <- ev_times
 
   structure(list(

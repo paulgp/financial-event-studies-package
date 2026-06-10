@@ -23,6 +23,7 @@ event_study(
   solver = c("hybrid", "fw", "qp"),
   lambda = NULL,
   r = c(0, 5),
+  force = c("unit", "none", "two-way"),
   se = c("auto", "placebo", "bootstrap", "tstat", "none"),
   reps = NULL,
   keep_data = TRUE,
@@ -83,6 +84,9 @@ matrix) for the synthetic-control objective; default identity.}
 \item{lambda}{Ridge penalty for `"ridge"`; `NULL` = cross-validated.}
 
 \item{r}{Factor-number range for `"gsynth"` cross-validation.}
+
+\item{force}{Fixed effects for `"gsynth"`: `"unit"` (default), `"none"`,
+or `"two-way"`.}
 
 \item{se}{Inference: `"auto"` maps mean/did/market/factor to `"tstat"`,
 sc/ridge/sdid to `"placebo"`, gsynth to `"bootstrap"`. `"none"` skips.}

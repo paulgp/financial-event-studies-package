@@ -1,0 +1,8 @@
+real-data problem: n0=4080 donors, t0=225 pre days, 15 treated
+full QP: 46.91s, obj 3.633706e-03, support 169
+hybrid support<= 225 ( 1x t0): 0.38s ( 123x), rel obj +4.37e-09, support used 147
+hybrid support<= 450 ( 2x t0): 0.37s ( 126x), rel obj +4.37e-09, support used 147
+hybrid support<=1125 ( 5x t0): 0.36s ( 129x), rel obj +4.37e-09, support used 147
+hybrid support<=2250 (10x t0): 0.36s ( 131x), rel obj +4.37e-09, support used 147
+
+GATE: PASS 
