@@ -180,7 +180,12 @@ Gsynth N=129,625 is a transposition of 129,165 (cannot be produced by any sample
   draw artifact to 1e-7 and the *Mean* cells from the same regression sample match to <5e-4,
   so the published Std cells are irreproducible in principle (documented data-vintage
   deviation). Gsynth pilot: feventr reproduces saved counterfactuals on pilot cohorts exactly.
-- **Table 1 — pilot bit-exact, full run in progress**: per-sim bias columns match the
-  published saved bias_estimates_*.csv to ~1e-16 (gsynth to 2e-17) with 0 coverage flips
-  across all 66 period-level decisions in 6 pilot sims.
+- **Table 1 — SIGNED OFF** (2026-06-10): 144/144 cells within tolerance; max deviation vs
+  published 0.005pp (bias) / 0.012 (coverage) ≈ 20×/2.5× inside tolerance. Verifier
+  independently reimplemented the make_tables aggregation (matched to 2.7e-15), scanned ALL
+  200 per-sim checkpoints against the published bias_estimates files (bit-exact incl. gsynth
+  point estimates; 32/2,200 gsynth coverage boolean flips from the unseeded 200-draw
+  bootstrap, all post-event, each moving a cell by 0.002), confirmed the seed mapping
+  (sim 7 panel agrees with the published saved panel to 5.6e-16), and falsified the panel
+  mapping by deliberate swap (breaks 38 cells). No conditions.
 - **Tables 2–3 — run in progress** (Panel B gsynth fitting at time of writing).

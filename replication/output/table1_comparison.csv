@@ -1,0 +1,145 @@
+"table","panel","row","col","units","estimate_published","estimate_reproduced","diff","tol","ok"
+1,"Panel A: Random Assignment + Random Timing","Simple Means","All Periods: E(Bias)","pp",0,0.000803399137006889,0.000803399137006889,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","All Periods: MAD","pp",0.04,0.0390816856416551,-0.00091831435834492,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","All Periods: RMSE","pp",0.58,0.577585581775851,-0.00241441822414878,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","Treated Periods: E(Bias)","pp",0.01,0.00876868789601444,-0.00123131210398556,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","Treated Periods: MAD","pp",0.17,0.172400598415643,0.00240059841564344,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","Untreated Periods: Coverage","decimal",0.03,0.03,0,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","Untreated Periods: E(Bias)","pp",0,6.87026110613529e-06,6.87026110613529e-06,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Simple Means","Untreated Periods: MAD","pp",0.04,0.0379917483351862,-0.00200825166481382,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","All Periods: E(Bias)","pp",-0.06,-0.0634783188878546,-0.00347831888785458,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","All Periods: MAD","pp",0.16,0.164634818959524,0.00463481895952444,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","All Periods: RMSE","pp",2.11,2.11347868328616,0.00347868328615819,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","Treated Periods: E(Bias)","pp",-0.07,-0.070197088382453,-0.000197088382452956,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","Treated Periods: MAD","pp",0.43,0.426795113365502,-0.00320488663449814,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","Untreated Periods: Coverage","decimal",0.44,0.438,-0.002,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","Untreated Periods: E(Bias)","pp",-0.06,-0.0628064419383947,-0.00280644193839472,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","CAPM","Untreated Periods: MAD","pp",0.17,0.170576144663812,0.00057614466381184,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","All Periods: E(Bias)","pp",-0.01,-0.0101778109973402,-0.000177810997340185,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","All Periods: MAD","pp",0.04,0.0370326867207757,-0.00296731327922434,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","All Periods: RMSE","pp",0.54,0.537770522496917,-0.002229477503083,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","Treated Periods: E(Bias)","pp",0,-0.000139911387145383,-0.000139911387145383,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","Treated Periods: MAD","pp",0.16,0.155291773644883,-0.004708226355117,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","Untreated Periods: Coverage","decimal",0.04,0.04,6.93889390390723e-18,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","Untreated Periods: E(Bias)","pp",-0.01,-0.0111816009583597,-0.00118160095835967,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Correct Factor Structure","Untreated Periods: MAD","pp",0.04,0.0388479459838811,-0.00115205401611889,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","All Periods: E(Bias)","pp",0,0.000408988713732706,0.000408988713732706,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","All Periods: MAD","pp",0.04,0.0429817868985657,0.00298178689856574,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","All Periods: RMSE","pp",0.56,0.560953068133043,0.000953068133042967,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","Treated Periods: E(Bias)","pp",0.02,0.0164300332507347,-0.00356996674926531,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","Treated Periods: MAD","pp",0.17,0.167221208754447,-0.00277879124555322,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","Untreated Periods: Coverage","decimal",0.03,0.038,0.00800000000000001,0.03,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","Untreated Periods: E(Bias)","pp",0,-0.00119311573996749,-0.00119311573996749,0.105,TRUE
+1,"Panel A: Random Assignment + Random Timing","Gsynth (PCA)","Untreated Periods: MAD","pp",0.04,0.0416895781578809,0.00168957815788087,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","All Periods: E(Bias)","pp",0.02,0.0183128416564579,-0.00168715834354208,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","All Periods: MAD","pp",0.05,0.0530605148959928,0.00306051489599283,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","All Periods: RMSE","pp",0.71,0.714157957717463,0.0041579577174633,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","Treated Periods: E(Bias)","pp",0.04,0.041550527866704,0.00155052786670396,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","Treated Periods: MAD","pp",0.18,0.176135450637921,-0.00386454936207878,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","Untreated Periods: Coverage","decimal",0.11,0.106,-0.00399999999999999,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","Untreated Periods: E(Bias)","pp",0.02,0.0159890730354333,-0.00401092696456668,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Simple Means","Untreated Periods: MAD","pp",0.05,0.0549815205395295,0.00498152053952954,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","All Periods: E(Bias)","pp",-0.05,-0.0484409823084267,0.00155901769157332,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","All Periods: MAD","pp",0.13,0.134680278150155,0.00468027815015518,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","All Periods: RMSE","pp",1.78,1.77616630634833,-0.00383369365166875,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","Treated Periods: Coverage","decimal",0.98,0.98,0,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","Treated Periods: E(Bias)","pp",-0.04,-0.0388607106860279,0.00113928931397207,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","Treated Periods: MAD","pp",0.35,0.354516732683519,0.0045167326835186,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","Untreated Periods: Coverage","decimal",0.4,0.4,0,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","Untreated Periods: E(Bias)","pp",-0.05,-0.0493990094706666,0.000600990529333441,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","CAPM","Untreated Periods: MAD","pp",0.14,0.140617522403281,0.000617522403281112,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","All Periods: E(Bias)","pp",-0.01,-0.00845272952087932,0.00154727047912068,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","All Periods: MAD","pp",0.03,0.0348568712180169,0.00485687121801692,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","All Periods: RMSE","pp",0.54,0.537180941657737,-0.0028190583422627,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","Treated Periods: E(Bias)","pp",0.02,0.0150627765376956,-0.00493722346230438,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","Treated Periods: MAD","pp",0.14,0.143802744106416,0.00380274410641629,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","Untreated Periods: Coverage","decimal",0.04,0.044,0.004,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","Untreated Periods: E(Bias)","pp",-0.01,-0.0108042801267368,-0.000804280126736813,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Correct Factor Structure","Untreated Periods: MAD","pp",0.04,0.0374388761393238,-0.00256112386067624,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","All Periods: E(Bias)","pp",0,0.00149601498734175,0.00149601498734175,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","All Periods: MAD","pp",0.04,0.0411707370235392,0.00117073702353922,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","All Periods: RMSE","pp",0.57,0.570225182283263,0.000225182283262959,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","Treated Periods: E(Bias)","pp",0.03,0.0306917688379707,0.000691768837970733,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","Treated Periods: MAD","pp",0.15,0.154882190328541,0.00488219032854059,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","Untreated Periods: Coverage","decimal",0.05,0.044,-0.006,0.03,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","Untreated Periods: E(Bias)","pp",0,-0.00142356039772115,-0.00142356039772115,0.105,TRUE
+1,"Panel B: Assignment Selection + Random Timing","Gsynth (PCA)","Untreated Periods: MAD","pp",0.04,0.0397430140283571,-0.000256985971642872,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","All Periods: E(Bias)","pp",-0.01,-0.011445769045718,-0.00144576904571802,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","All Periods: MAD","pp",0.05,0.0481690631791812,-0.00183093682081882,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","All Periods: RMSE","pp",0.63,0.626909177573787,-0.00309082242621272,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","Treated Periods: E(Bias)","pp",0,-0.000211874079326317,-0.000211874079326317,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","Treated Periods: MAD","pp",0.21,0.208860191963809,-0.00113980803619065,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","Untreated Periods: Coverage","decimal",0.05,0.048,-0.002,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","Untreated Periods: E(Bias)","pp",-0.01,-0.0125691585423572,-0.00256915854235719,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Simple Means","Untreated Periods: MAD","pp",0.05,0.0450504701796632,-0.00494952982033678,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","All Periods: E(Bias)","pp",0.25,0.247463395726979,-0.00253660427302102,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","All Periods: MAD","pp",0.27,0.271681545179188,0.00168154517918806,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","All Periods: RMSE","pp",3.49,3.49458973909989,0.00458973909989169,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","Treated Periods: E(Bias)","pp",2.71,2.70936645277613,-0.000633547223870323,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","Treated Periods: MAD","pp",2.71,2.70936645277613,-0.000633547223870323,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","Untreated Periods: Coverage","decimal",0.46,0.456,-0.00400000000000006,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","Untreated Periods: E(Bias)","pp",0,0.00127309002206396,0.00127309002206396,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","CAPM","Untreated Periods: MAD","pp",0.16,0.161069867910734,0.00106986791073416,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","All Periods: E(Bias)","pp",-0.02,-0.0222673961762307,-0.00226739617623074,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","All Periods: MAD","pp",0.04,0.0435692387185308,0.00356923871853081,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","All Periods: RMSE","pp",0.54,0.53846798108147,-0.00153201891852994,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","Treated Periods: E(Bias)","pp",0,0.00267114595741841,0.00267114595741841,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","Treated Periods: MAD","pp",0.12,0.118941908382202,-0.00105809161779769,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","Untreated Periods: Coverage","decimal",0.04,0.042,0.002,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","Untreated Periods: E(Bias)","pp",-0.02,-0.0247612503895957,-0.00476125038959566,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Correct Factor Structure","Untreated Periods: MAD","pp",0.04,0.0446565568140499,0.00465655681404991,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","All Periods: E(Bias)","pp",-0.01,-0.0104661333751148,-0.000466133375114841,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","All Periods: MAD","pp",0.04,0.0426036985155713,0.00260369851557132,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","All Periods: RMSE","pp",0.57,0.569193390841137,-0.000806609158862881,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","Treated Periods: E(Bias)","pp",0.01,0.0136834577246132,0.00368345772461323,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","Treated Periods: MAD","pp",0.13,0.131538473128011,0.00153847312801067,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","Untreated Periods: Coverage","decimal",0.04,0.046,0.006,0.03,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","Untreated Periods: E(Bias)","pp",-0.01,-0.0128810924850877,-0.00288109248508765,0.105,TRUE
+1,"Panel C: Random Assignment + Timing Selection","Gsynth (PCA)","Untreated Periods: MAD","pp",0.04,0.0433016874113698,0.00330168741136985,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","All Periods: E(Bias)","pp",-0.05,-0.0516948458456923,-0.00169484584569229,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","All Periods: MAD","pp",0.07,0.069502744722948,-0.000497255277051967,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","All Periods: RMSE","pp",0.88,0.883358667019211,0.00335866701921061,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","Treated Periods: E(Bias)","pp",-0.52,-0.515353390007699,0.00464660999230093,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","Treated Periods: MAD","pp",0.52,0.517147726735602,-0.00285227326439785,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","Untreated Periods: Coverage","decimal",0.08,0.076,-0.004,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","Untreated Periods: E(Bias)","pp",-0.01,-0.00532899142949163,0.00467100857050837,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Simple Means","Untreated Periods: MAD","pp",0.05,0.0538527421398729,0.00385274213987286,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","All Periods: E(Bias)","pp",0.21,0.210156434817973,0.000156434817972784,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","All Periods: MAD","pp",0.23,0.230294542196957,0.000294542196956543,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","All Periods: RMSE","pp",2.92,2.92316756162778,0.00316756162777754,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","Treated Periods: E(Bias)","pp",2.26,2.26302536829944,0.00302536829943945,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","Treated Periods: MAD","pp",2.26,2.26302536829944,0.00302536829943945,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","Untreated Periods: Coverage","decimal",0.4,0.402,0.00199999999999995,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","Untreated Periods: E(Bias)","pp",0,0.00486954146982612,0.00486954146982612,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","CAPM","Untreated Periods: MAD","pp",0.13,0.130542388574208,0.000542388574207547,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","All Periods: E(Bias)","pp",-0.02,-0.0152898863212204,0.00471011367877965,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","All Periods: MAD","pp",0.04,0.0370439418845174,-0.00295605811548262,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","All Periods: RMSE","pp",0.52,0.523025527240967,0.00302552724096739,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","Treated Periods: E(Bias)","pp",0.01,0.00967268482488421,-0.000327315175115792,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","Treated Periods: MAD","pp",0.12,0.124167556052533,0.00416755605253299,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","Untreated Periods: Coverage","decimal",0.05,0.05,0,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","Untreated Periods: E(Bias)","pp",-0.02,-0.0177861434358308,0.00221385656416919,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Correct Factor Structure","Untreated Periods: MAD","pp",0.04,0.0385666131421094,-0.00143338685789063,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","All Periods: E(Bias)","pp",-0.01,-0.00645434952102748,0.00354565047897252,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","All Periods: MAD","pp",0.04,0.0373429761551157,-0.00265702384488429,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","All Periods: RMSE","pp",0.56,0.556375911062891,-0.00362408893710942,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","Treated Periods: Coverage","decimal",1,1,0,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","Treated Periods: E(Bias)","pp",-0.01,-0.0110427891650251,-0.00104278916502507,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","Treated Periods: MAD","pp",0.14,0.138113646030256,-0.00188635396974385,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","Untreated Periods: Coverage","decimal",0.04,0.052,0.012,0.03,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","Untreated Periods: E(Bias)","pp",-0.01,-0.00599550555662772,0.00400449444337228,0.105,TRUE
+1,"Panel D: Assignment Selection + Timing Selection","Gsynth (PCA)","Untreated Periods: MAD","pp",0.04,0.0381879036167126,-0.00181209638328737,0.105,TRUE
