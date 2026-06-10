@@ -1,0 +1,65 @@
+table,panel,row,col,estimate,se,stars,n,units,page,notes
+4,Panel A: 1980-1989,CAPM Beta,Treated Mean,0.961,,,,beta,43,
+4,Panel A: 1980-1989,CAPM Beta,Treated Std,0.523,,,,beta,43,
+4,Panel A: 1980-1989,CAPM Beta,Random Control Mean,0.582,,,,beta,43,
+4,Panel A: 1980-1989,CAPM Beta,Random Control Std,0.551,,,,beta,43,
+4,Panel A: 1980-1989,FF3F Mkt Beta,Treated Mean,1.108,,,,beta,43,
+4,Panel A: 1980-1989,FF3F Mkt Beta,Treated Std,0.539,,,,beta,43,
+4,Panel A: 1980-1989,FF3F Mkt Beta,Random Control Mean,0.854,,,,beta,43,
+4,Panel A: 1980-1989,FF3F Mkt Beta,Random Control Std,0.784,,,,beta,43,
+4,Panel A: 1980-1989,FF3F SMB Beta,Treated Mean,0.558,,,,beta,43,
+4,Panel A: 1980-1989,FF3F SMB Beta,Treated Std,0.604,,,,beta,43,
+4,Panel A: 1980-1989,FF3F SMB Beta,Random Control Mean,0.815,,,,beta,43,
+4,Panel A: 1980-1989,FF3F SMB Beta,Random Control Std,1.044,,,,beta,43,
+4,Panel A: 1980-1989,FF3F HML Beta,Treated Mean,-0.148,,,,beta,43,
+4,Panel A: 1980-1989,FF3F HML Beta,Treated Std,0.987,,,,beta,43,
+4,Panel A: 1980-1989,FF3F HML Beta,Random Control Mean,0.021,,,,beta,43,
+4,Panel A: 1980-1989,FF3F HML Beta,Random Control Std,1.188,,,,beta,43,
+4,Panel B: 1990-1999,CAPM Beta,Treated Mean,1.025,,,,beta,43,
+4,Panel B: 1990-1999,CAPM Beta,Treated Std,0.660,,,,beta,43,
+4,Panel B: 1990-1999,CAPM Beta,Random Control Mean,0.651,,,,beta,43,
+4,Panel B: 1990-1999,CAPM Beta,Random Control Std,0.754,,,,beta,43,
+4,Panel B: 1990-1999,FF3F Mkt Beta,Treated Mean,1.171,,,,beta,43,
+4,Panel B: 1990-1999,FF3F Mkt Beta,Treated Std,0.660,,,,beta,43,
+4,Panel B: 1990-1999,FF3F Mkt Beta,Random Control Mean,0.873,,,,beta,43,
+4,Panel B: 1990-1999,FF3F Mkt Beta,Random Control Std,0.911,,,,beta,43,
+4,Panel B: 1990-1999,FF3F SMB Beta,Treated Mean,0.489,,,,beta,43,
+4,Panel B: 1990-1999,FF3F SMB Beta,Treated Std,0.661,,,,beta,43,
+4,Panel B: 1990-1999,FF3F SMB Beta,Random Control Mean,0.805,,,,beta,43,
+4,Panel B: 1990-1999,FF3F SMB Beta,Random Control Std,1.215,,,,beta,43,
+4,Panel B: 1990-1999,FF3F HML Beta,Treated Mean,-0.015,,,,beta,43,
+4,Panel B: 1990-1999,FF3F HML Beta,Treated Std,1.242,,,,beta,43,
+4,Panel B: 1990-1999,FF3F HML Beta,Random Control Mean,0.022,,,,beta,43,
+4,Panel B: 1990-1999,FF3F HML Beta,Random Control Std,1.475,,,,beta,43,
+4,Panel B: 2000-2009,CAPM Beta,Treated Mean,1.087,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,CAPM Beta,Treated Std,0.697,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,CAPM Beta,Random Control Mean,0.824,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,CAPM Beta,Random Control Std,0.985,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F Mkt Beta,Treated Mean,1.079,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F Mkt Beta,Treated Std,0.560,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F Mkt Beta,Random Control Mean,0.820,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F Mkt Beta,Random Control Std,0.688,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F SMB Beta,Treated Mean,0.271,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F SMB Beta,Treated Std,0.674,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F SMB Beta,Random Control Mean,0.667,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F SMB Beta,Random Control Std,0.929,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F HML Beta,Treated Mean,-0.002,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F HML Beta,Treated Std,1.227,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F HML Beta,Random Control Mean,0.075,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel B: 2000-2009,FF3F HML Beta,Random Control Std,1.482,,,,beta,43,panel label printed as second Panel B in paper (likely typo for Panel C)
+4,Panel D: 2010-2020,CAPM Beta,Treated Mean,1.060,,,,beta,43,
+4,Panel D: 2010-2020,CAPM Beta,Treated Std,0.388,,,,beta,43,
+4,Panel D: 2010-2020,CAPM Beta,Random Control Mean,0.973,,,,beta,43,
+4,Panel D: 2010-2020,CAPM Beta,Random Control Std,0.997,,,,beta,43,
+4,Panel D: 2010-2020,FF3F Mkt Beta,Treated Mean,1.026,,,,beta,43,
+4,Panel D: 2010-2020,FF3F Mkt Beta,Treated Std,0.343,,,,beta,43,
+4,Panel D: 2010-2020,FF3F Mkt Beta,Random Control Mean,0.872,,,,beta,43,
+4,Panel D: 2010-2020,FF3F Mkt Beta,Random Control Std,0.614,,,,beta,43,
+4,Panel D: 2010-2020,FF3F SMB Beta,Treated Mean,0.225,,,,beta,43,
+4,Panel D: 2010-2020,FF3F SMB Beta,Treated Std,0.520,,,,beta,43,
+4,Panel D: 2010-2020,FF3F SMB Beta,Random Control Mean,0.628,,,,beta,43,
+4,Panel D: 2010-2020,FF3F SMB Beta,Random Control Std,1.201,,,,beta,43,
+4,Panel D: 2010-2020,FF3F HML Beta,Treated Mean,-0.273,,,,beta,43,
+4,Panel D: 2010-2020,FF3F HML Beta,Treated Std,0.590,,,,beta,43,
+4,Panel D: 2010-2020,FF3F HML Beta,Random Control Mean,0.311,,,,beta,43,
+4,Panel D: 2010-2020,FF3F HML Beta,Random Control Std,1.272,,,,beta,43,

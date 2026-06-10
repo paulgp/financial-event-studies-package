@@ -1,0 +1,13 @@
+table,panel,row,col,estimate,se,stars,n,units,page,notes
+6,,Market mean,Full sample,0.8,,,"14,847",percent,49,Table 6: Average three day cumulative p.p.
+6,,Market mean,Public targets,-1.2,,,"3,297",percent,49,
+6,,Market mean,Private targets,1.3,,,"7,030",percent,49,
+6,,Market mean,Other targets,1.6,,,"4,520",percent,49,
+6,,Market mean,Cash merger,1.1,,,"9,261",percent,49,
+6,,Market mean,Stock merger,0.4,,,"5,592",percent,49,
+6,,Gsynth mean,Full sample,0.7,,,"14,847",percent,49,
+6,,Gsynth mean,Public targets,-1.3,,,"3,297",percent,49,
+6,,Gsynth mean,Private targets,1.0,,,"7,030",percent,49,
+6,,Gsynth mean,Other targets,1.5,,,"4,520",percent,49,
+6,,Gsynth mean,Cash merger,1.0,,,"9,261",percent,49,
+6,,Gsynth mean,Stock merger,0.2,,,"5,592",percent,49,

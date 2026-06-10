@@ -1,0 +1,21 @@
+table,panel,row,col,estimate,se,stars,n,units,page,notes
+7,,CAPM Beta,Winner Mean,1.148,,,,beta,52,
+7,,CAPM Beta,Winner Median,0.922,,,,beta,52,
+7,,CAPM Beta,Loser Mean,1.114,,,,beta,52,
+7,,CAPM Beta,Loser Median,0.968,,,,beta,52,
+7,,CAPM Beta,Mean t-test Loser - Winner,-0.034,,,,beta,52,difference in means
+7,,FF3F Mkt Beta,Winner Mean,1.157,,,,beta,52,
+7,,FF3F Mkt Beta,Winner Median,0.945,,,,beta,52,
+7,,FF3F Mkt Beta,Loser Mean,1.172,,,,beta,52,
+7,,FF3F Mkt Beta,Loser Median,1.010,,,,beta,52,
+7,,FF3F Mkt Beta,Mean t-test Loser - Winner,0.015,,,,beta,52,difference in means
+7,,FF3F SMB Beta,Winner Mean,0.369,,,,beta,52,
+7,,FF3F SMB Beta,Winner Median,0.291,,,,beta,52,
+7,,FF3F SMB Beta,Loser Mean,0.232,,,,beta,52,
+7,,FF3F SMB Beta,Loser Median,0.168,,,,beta,52,
+7,,FF3F SMB Beta,Mean t-test Loser - Winner,-0.138,,,,beta,52,difference in means
+7,,FF3F HML Beta,Winner Mean,-0.055,,,,beta,52,
+7,,FF3F HML Beta,Winner Median,-0.171,,,,beta,52,
+7,,FF3F HML Beta,Loser Mean,0.313,,,,beta,52,
+7,,FF3F HML Beta,Loser Median,0.393,,,,beta,52,
+7,,FF3F HML Beta,Mean t-test Loser - Winner,0.368,,*,,beta,52,difference in means; only starred cell in table
