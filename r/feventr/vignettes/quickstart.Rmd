@@ -96,6 +96,26 @@ b
 summary(b)
 ```
 
+## Calendar-time portfolios
+
+`calendar_time()` is the Jaffe–Mandelker calendar-time portfolio estimator
+(Fama 1998): each calendar period's portfolio holds every unit within
+`window` of its event, and the portfolio return is regressed on the factors —
+the intercept is the abnormal return per period. Overlapping event windows,
+which make event-time CARs cross-sectionally dependent, are absorbed by the
+portfolio aggregation:
+
+```{r}
+ct <- calendar_time(sim$data, "id", "t", "ret", events = ev,
+                    window = c(0, 5), returns = "simple")
+ct
+plot(ct)
+```
+
+Pass `factors` for a CAPM/FF3F alpha (intercept-only as here treats `ret` as
+already abnormal), `weight` for value-weighted portfolios, and
+`min_units` to drop thin periods.
+
 ## The solver
 
 Synthetic control with thousands of donors is the package's reason to exist:

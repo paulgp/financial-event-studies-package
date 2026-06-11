@@ -21,10 +21,14 @@ time, cumulative effects, standard errors, diagnostics, and plot methods.
 
 Two first-class modes: `event_study()` (one event, many treated units) and
 `event_study_batch()` (hundreds–thousands of events, each with its own event
-date and donor pool; fit per event in parallel, cross-event SEs). Beta
-diagnostics via `event_betas()`; the paper's two-factor simulation DGP via
-`simulate_events()` (reproduces the published simulation panels bit-for-bit
-given the same seeds).
+date and donor pool; fit per event in parallel, cross-event SEs). A third,
+complementary design via `calendar_time()`: the Jaffe–Mandelker calendar-time
+portfolio estimator (Fama 1998) — each calendar period's portfolio holds every
+unit within the event window, portfolio returns are regressed on factors, and
+the alpha is the per-period abnormal return (classical or Newey–West SEs;
+equal- or value-weighted). Beta diagnostics via `event_betas()`; the paper's
+two-factor simulation DGP via `simulate_events()` (reproduces the published
+simulation panels bit-for-bit given the same seeds).
 
 ## Quickstart
 

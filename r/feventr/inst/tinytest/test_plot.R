@@ -41,3 +41,10 @@ b <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
                                 method = "mean", window = c(0, 4),
                                 est_window = c(-30, -1), returns = "simple")
 expect_snapshot_plot(function() plot(b), label = "batch_att_mean")
+
+# calendar-time portfolio plots (reuse the staggered batch panel)
+ct <- feventr::calendar_time(long, "id", "t", "ret", events = ev,
+                             window = c(0, 4), returns = "simple")
+expect_snapshot_plot(function() plot(ct), label = "caltime_car")
+expect_snapshot_plot(function() plot(ct, what = "n_units"),
+                     label = "caltime_n_units")

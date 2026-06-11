@@ -16,6 +16,18 @@ Goldsmith-Pinkham & Lyu, *Causal Inference in Financial Event Studies*
 | 3 — Replication T1–T7 | **DONE 2026-06-10** | All 7 tables adversarially verified (verdicts below): T1 144/144, T2 48/48 pts, T3 28/28, T4 62/64 (2 published cells proven stale literals), T5 20/20, T6 12/12, T7 20/20 |
 | 4 — Polish | **DONE 2026-06-10** | 163 tinytest results OK incl. 5 SVG snapshots; 2 vignettes; README w/ benchmarks; CI yaml; R CMD check --as-cran: 0 errors, 0 warnings, 2 environmental NOTEs |
 
+## Post-v1 additions
+
+- **2026-06-11 — `calendar_time()`**: Jaffe–Mandelker calendar-time portfolio estimator
+  (Fama 1998). Per-calendar-period event portfolios (equal- or value-weighted via a
+  `weight` column, `min_units` threshold) regressed on user factors; alpha = abnormal
+  return per period; classical or Newey–West (Bartlett) SEs; `align = "value"` supported.
+  New class `fes_caltime` with print/summary/coef/plot (`"car"` cumulative-abnormal +
+  constant-alpha trend, `"n_units"`), 2 new SVG snapshots, `test_caltime.R` (17 results:
+  hand-built portfolio ≡ lm() at 1e-12 incl. classical SEs, effect recovery, overlap
+  dedup, value-weight degeneracy, NW lag-0 ≈ HC0, value-alignment on gapped index).
+  Not a paper-table estimator — no replication target; validation is the lm() reference.
+
 ## Decisions
 
 - gsynth: wrap CRAN `gsynth` 1.2.1 for v1. SDID: own FW solver (synthdid math, dual BSD-3/GPL≥2).
