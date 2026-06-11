@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  # pak resolves the GitHub-only synthdid dependency; without a token it uses
+  # a shared bundled PAT that gets rate-limited
+  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   check:
     runs-on: ${{ matrix.os }}
