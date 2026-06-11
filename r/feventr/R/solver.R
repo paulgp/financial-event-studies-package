@@ -79,12 +79,16 @@ qp_solve <- function(A, b, eta = 0) {
 #'   after FW); default `min(n0, 5 * t0)`.
 #' @param eta Ridge penalty on the weights.
 #' @param max_iter,tol Frank-Wolfe iteration cap and minimum step size.
+#' @param w0 Optional warm start (length n0): Frank-Wolfe is seeded with
+#'   these weights (projected onto the simplex) instead of uniform. The
+#'   hybrid KKT screen still verifies optimality, so a warm start changes
+#'   the iteration count, not the solution. Ignored by `method = "qp"`.
 #' @return `list(w, objective, iterations, support, method)`.
 #' @export
 solve_simplex_ls <- function(A, b, V = NULL,
                              method = c("hybrid", "fw", "qp"),
                              support_size = NULL, eta = 0,
-                             max_iter = 2000, tol = 1e-12) {
+                             max_iter = 2000, tol = 1e-12, w0 = NULL) {
   method <- match.arg(method)
   A <- as.matrix(A)
   b <- as.vector(b)
@@ -101,13 +105,24 @@ solve_simplex_ls <- function(A, b, V = NULL,
     }
   }
   n0 <- ncol(A)
+  if (!is.null(w0)) {
+    w0 <- pmax(as.numeric(w0), 0)
+    s <- sum(w0)
+    w0 <- if (length(w0) == n0 && s > 0) w0 / s else NULL
+  }
   iters <- 0L
   support <- seq_len(n0)
   if (method == "qp") {
     w <- qp_solve(A, b, eta)
   } else {
-    fw_iter <- if (method == "hybrid") min(max_iter, 300L) else max_iter
-    fw <- fw_solve(A, b, eta = eta, max_iter = fw_iter, tol = tol)
+    # warm-started hybrid: the QP polish + KKT screen below reach the exact
+    # optimum from any starting support, so FW only needs a few steps to
+    # flag obvious new donors — running the full FW phase would cost more
+    # than it saves (FW is the dominant cost at large n0)
+    fw_iter <- if (method != "hybrid") max_iter
+               else if (is.null(w0)) min(max_iter, 300L)
+               else min(max_iter, 20L)
+    fw <- fw_solve(A, b, eta = eta, w0 = w0, max_iter = fw_iter, tol = tol)
     w <- fw$w
     iters <- fw$iterations
     if (method == "hybrid") {

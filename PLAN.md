@@ -18,6 +18,25 @@ Goldsmith-Pinkham & Lyu, *Causal Inference in Financial Event Studies*
 
 ## Post-v1 additions
 
+- **2026-06-11 — conformal inference + faster placebo** (ideas vetted from
+  jamesbrandecon/fastaugsynth): `se = "conformal"` in `event_study()` (methods
+  mean/did/sc/ridge/sdid, V unsupported) implements Chernozhukov–Wüthrich–Zhu
+  refit-under-the-null with exact permutation distributions — single-post enumeration
+  for pointwise p/CIs, cyclic-shift (moving-block) joint test + CI for a constant
+  effect; CI endpoints via bracket+bisection on the p-value; deterministic, `level`
+  fixed at fit time. Fit stores `se$ci/avg_ci/p/avg_p` (no SEs); print/summary/confint/
+  plot handle it. `solve_simplex_ls()` gained `w0` warm start (FW cap drops to 20 when
+  warm; KKT screen still certifies the optimum → solution unchanged, rel diff ~1e-11);
+  conformal threads warm starts across null refits: 27.4s → 4.4s at n0=2,000 (T1=11).
+  Placebo warm-starting from full-fit weights was tried and REJECTED with measurement:
+  each draw targets a different pseudo-treated mean, so the full-fit solution carries
+  no information (0.8–0.9×). Instead placebo got `cores =` (assignments pre-drawn →
+  draws bit-identical across core counts and to the old serial path): 12.7s → 2.2s at
+  8 cores. Verified: brute-force pointwise + joint references (method "mean", exact
+  equality), CI boundary crossing vs hand p-function, sc CI covers true tau, gsynth/V
+  guards, warm-vs-cold objective 1e-8, parallel-vs-serial draws identical. 229 tests OK,
+  R CMD check clean.
+
 - **2026-06-11 — `calendar_time()`**: Jaffe–Mandelker calendar-time portfolio estimator
   (Fama 1998). Per-calendar-period event portfolios (equal- or value-weighted via a
   `weight` column, `min_units` threshold) regressed on user factors; alpha = abnormal

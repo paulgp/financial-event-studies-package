@@ -18,23 +18,29 @@ plot.fes_fit <- function(x, what = c("att", "car", "paths", "weights"),
   if (what == "att" || what == "car") {
     y <- if (what == "att") x$att else x$car
     t <- as.numeric(names(y))
-    band <- ci && what == "att" && !is.null(x$se$att)
-    ylim <- if (band) {
-      z <- stats::qnorm(1 - (1 - level) / 2)
-      range(y - z * x$se$att, y + z * x$se$att, 0)
-    } else range(y, 0)
+    # band: stored conformal CI bounds if present (level fixed at fit time),
+    # otherwise a normal band from the stored SEs
+    has_ci <- !is.null(x$se$ci)
+    band <- ci && what == "att" && (has_ci || !is.null(x$se$att))
+    if (band) {
+      if (has_ci) {
+        lo <- x$se$ci[, 1]; hi <- x$se$ci[, 2]
+      } else {
+        z <- stats::qnorm(1 - (1 - level) / 2)
+        lo <- y - z * x$se$att; hi <- y + z * x$se$att
+      }
+      band <- all(is.finite(lo)) && all(is.finite(hi))
+    }
+    ylim <- if (band) range(lo, hi, 0) else range(y, 0)
     plot(t, y, type = "n", ylim = ylim, xlab = "Event time",
          ylab = if (what == "att") "ATT" else
            paste0("Cumulative effect (", x$conventions$cumulate, ")"),
          main = paste0(x$method, if (what == "car") " - cumulative"), ...)
     graphics::abline(h = 0, col = "grey60")
-    if (band) {
-      z <- stats::qnorm(1 - (1 - level) / 2)
-      graphics::polygon(c(t, rev(t)),
-                        c(y - z * x$se$att, rev(y + z * x$se$att)),
+    if (band)
+      graphics::polygon(c(t, rev(t)), c(lo, rev(hi)),
                         col = grDevices::adjustcolor("steelblue", 0.25),
                         border = NA)
-    }
     graphics::lines(t, y, type = "b", pch = 19, col = "steelblue")
   } else if (what == "paths") {
     t <- as.numeric(names(x$paths$treated))

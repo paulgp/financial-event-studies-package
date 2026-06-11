@@ -60,13 +60,14 @@ eng_factor <- function(Y, N0, T0, F, beta = NULL) {
 # convention) or a caller-supplied t0 x N0 matching matrix (e.g. cumulated
 # pre-event paths). Weights are then applied to per-period returns.
 eng_sc <- function(Y, N0, T0, Ymatch = NULL, V = NULL, solver = "hybrid",
-                   support_size = NULL, max_iter = 2000) {
+                   support_size = NULL, max_iter = 2000, w0 = NULL) {
   post <- seq.int(T0 + 1L, ncol(Y))
   A <- if (is.null(Ymatch)) t(Y[seq_len(N0), seq_len(T0), drop = FALSE]) else Ymatch
   trt <- colMeans(Y[-seq_len(N0), , drop = FALSE])
   b <- if (is.null(Ymatch)) trt[seq_len(T0)] else attr(Ymatch, "b")
   sol <- solve_simplex_ls(A, b, V = V, method = solver,
-                          support_size = support_size, max_iter = max_iter)
+                          support_size = support_size, max_iter = max_iter,
+                          w0 = w0)
   omega <- stats::setNames(sol$w, rownames(Y)[seq_len(N0)])
   y0hat <- as.vector(crossprod(Y[seq_len(N0), , drop = FALSE], sol$w))
   list(y0hat = y0hat, tau = trt[post] - y0hat[post],
@@ -85,9 +86,9 @@ eng_sc <- function(Y, N0, T0, Ymatch = NULL, V = NULL, solver = "hybrid",
 # singular value of X0, as in augsynth's ridge_lambda.R.
 eng_ridge_sc <- function(Y, N0, T0, Ymatch = NULL, V = NULL, lambda = NULL,
                          solver = "hybrid", support_size = NULL,
-                         max_iter = 2000, n_lambda = 20L) {
+                         max_iter = 2000, n_lambda = 20L, w0 = NULL) {
   base <- eng_sc(Y, N0, T0, Ymatch = Ymatch, V = V, solver = solver,
-                 support_size = support_size, max_iter = max_iter)
+                 support_size = support_size, max_iter = max_iter, w0 = w0)
   w_sc <- unname(base$weights$omega)
   X0 <- t(Y[seq_len(N0), seq_len(T0), drop = FALSE])   # t0 x n0
   x1 <- colMeans(Y[-seq_len(N0), seq_len(T0), drop = FALSE])

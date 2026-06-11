@@ -25,8 +25,10 @@ event_study(
   lambda = NULL,
   r = c(0, 5),
   force = c("unit", "none", "two-way"),
-  se = c("auto", "placebo", "bootstrap", "tstat", "none"),
+  se = c("auto", "placebo", "bootstrap", "tstat", "conformal", "none"),
   reps = NULL,
+  level = 0.95,
+  cores = 1L,
   keep_data = TRUE,
   seed = NULL
 )
@@ -97,15 +99,28 @@ matrix) for the synthetic-control objective; default identity.}
 or \code{"two-way"}.}
 
 \item{se}{Inference: \code{"auto"} maps mean/did/market/factor to \code{"tstat"},
-sc/ridge/sdid to \code{"placebo"}, gsynth to \code{"bootstrap"}. \code{"none"} skips.}
+sc/ridge/sdid to \code{"placebo"}, gsynth to \code{"bootstrap"}. \code{"conformal"}
+(methods mean/did/sc/ridge/sdid, \code{V = NULL}) is the Chernozhukov,
+Wuthrich & Zhu (2021) refit-under-the-null procedure with exact
+(deterministic, no Monte Carlo) permutation distributions: per-period
+p-values and CIs via single-post enumeration, plus a moving-block joint
+test and CI for a constant effect over the window. Conformal fits store
+CIs and p-values rather than SEs. \code{"none"} skips.}
 
 \item{reps}{Placebo repetitions / bootstrap draws (\code{NULL} = method
 default: 100 placebo, 1000 bootstrap).}
 
+\item{level}{Confidence level for conformal CIs (fixed at fit time;
+ignored by other \code{se} types, which set the level in \code{\link[=confint]{confint()}}).}
+
+\item{cores}{Placebo refits run with \code{parallel::mclapply(mc.cores = cores)}; all placebo assignments are drawn up front, so results are
+identical for any \code{cores}.}
+
 \item{keep_data}{Store the panel matrices in the fit (needed for plots,
 \code{event_betas()}, placebo inference re-runs).}
 
-\item{seed}{Optional RNG seed for placebo/bootstrap inference.}
+\item{seed}{Optional RNG seed for placebo/bootstrap inference (conformal
+inference is deterministic).}
 }
 \value{
 An object of class \code{fes_fit}.

@@ -19,6 +19,15 @@ time, cumulative effects, standard errors, diagnostics, and plot methods.
 | `sdid` | Synthetic difference-in-differences (synthdid algorithm port) | placebo |
 | `gsynth` | Generalized synthetic control (wraps CRAN `gsynth`) | parametric bootstrap (1,000) |
 
+Beyond `se = "auto"`: `se = "conformal"` (methods mean/did/sc/ridge/sdid) runs
+Chernozhukov–Wüthrich–Zhu refit-under-the-null inference with *exact*
+permutation distributions — per-period p-values and CIs via single-post
+enumeration and a moving-block joint test for a constant effect — so it is
+deterministic (no Monte Carlo, no seed) and fast: each null refit warm-starts
+the solver from the previous solution (~4s for a full set of CIs at 2,000
+donors). Placebo inference parallelizes with `cores =` (assignments are
+pre-drawn, so results are identical for any core count).
+
 Two first-class modes: `event_study()` (one event, many treated units) and
 `event_study_batch()` (hundreds–thousands of events, each with its own event
 date and donor pool; fit per event in parallel, cross-event SEs). A third,

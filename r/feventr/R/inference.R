@@ -35,20 +35,120 @@ inf_tstat <- function(Y, N0, T0, eng, method) {
 # vce(placebo)): repeatedly reassign treatment to a random subset of the
 # donors (same number as actually treated), refit the estimator on donors
 # only, and use the dispersion of the placebo estimates as the SE.
-inf_placebo <- function(Y, N0, T0, n_treated, refit, reps = 100, seed = NULL) {
+# All placebo assignments are drawn up front (the refits consume no RNG), so
+# the draws are identical for any `cores` and match the previous serial
+# implementation seed-for-seed; refits then run in parallel.
+# Deliberately NOT warm-started from the full-fit weights: unlike conformal
+# refits (same target, one coordinate shifted by h0), each placebo draw
+# targets a different pseudo-treated group's mean, so the full-fit solution
+# carries no information about the draw's optimum (measured: no speedup,
+# sometimes slower via extra KKT-screen rounds).
+inf_placebo <- function(Y, N0, T0, n_treated, refit, reps = 100, seed = NULL,
+                        cores = 1L) {
   if (N0 <= n_treated)
     stop("placebo inference needs more donors than treated units")
   if (!is.null(seed)) set.seed(seed)
-  Tpost <- ncol(Y) - T0
-  draws <- matrix(NA_real_, reps, Tpost)
-  for (k in seq_len(reps)) {
-    fake <- sample.int(N0, n_treated)
+  fakes <- lapply(seq_len(reps), function(k) sample.int(N0, n_treated))
+  fit_one <- function(fake) {
     Yp <- rbind(Y[setdiff(seq_len(N0), fake), , drop = FALSE],
                 Y[fake, , drop = FALSE])
-    draws[k, ] <- refit(Yp, N0 - n_treated, T0)$tau
+    refit(Yp, N0 - n_treated, T0)$tau
   }
+  taus <- if (cores > 1L) parallel::mclapply(fakes, fit_one, mc.cores = cores)
+          else lapply(fakes, fit_one)
+  draws <- do.call(rbind, taus)
   avg <- rowMeans(draws)
   list(att = apply(draws, 2L, stats::sd),
        avg = stats::sd(avg),
        df = reps - 1L, method = "placebo", reps = reps, draws = draws)
+}
+
+# Conformal inference (Chernozhukov, Wuthrich & Zhu 2021, JASA): impose the
+# null h0, refit with the null-adjusted post period(s) *included in the
+# fit*, and test whether the post residual(s) look exchangeable with the
+# fit residuals. Two exact shortcuts replace Monte Carlo permutation
+# sampling (the fastaugsynth tricks):
+#   - pointwise (one post period): a permutation only chooses which single
+#     residual lands in the post slot, so the exact permutation
+#     distribution of the |statistic| is just |residuals| — enumerate it.
+#   - joint constant-effect null over the whole post window: moving-block
+#     (cyclic-shift) permutations; all T blocks enumerated.
+# CI endpoints come from bracket-expansion + bisection on the p-value (the
+# p-value is a step function; granularity 1/(T0+1)). Everything is
+# deterministic — no seed, no reps. Each refit reuses the previous
+# solution as a Frank-Wolfe warm start: across h0 trials only the linear
+# term of the objective moves, so the active donor set barely changes.
+inf_conformal <- function(Y, N0, T0, refit, att, level = 0.95) {
+  Tn <- ncol(Y)
+  T1 <- Tn - T0
+  alpha <- 1 - level
+  pre <- seq_len(T0)
+  wenv <- new.env(parent = emptyenv())
+  wenv$w <- NULL
+
+  # residuals over (pre periods + `cols`) from a refit under null h0; the
+  # included columns all count as estimation periods, with a duplicated
+  # dummy post column to satisfy the engine contract (its tau is unused)
+  resids <- function(cols, h0) {
+    k <- length(cols)
+    Yn <- Y[, c(pre, cols), drop = FALSE]
+    Yn[-seq_len(N0), T0 + seq_len(k)] <- Yn[-seq_len(N0), T0 + seq_len(k)] - h0
+    Ya <- cbind(Yn, Yn[, T0 + k])
+    f <- refit(Ya, N0, T0 + k, w0 = wenv$w)
+    om <- f$weights$omega_sc
+    if (is.null(om)) om <- f$weights$omega
+    if (!is.null(om) && all(om >= -1e-12)) wenv$w <- unname(om)
+    e <- colMeans(Ya[-seq_len(N0), , drop = FALSE]) - f$y0hat
+    e[seq_len(T0 + k)]
+  }
+
+  p_point <- function(j, h0) {
+    e <- resids(T0 + j, h0)
+    mean(abs(e) >= abs(e[T0 + 1L]) - 1e-12)
+  }
+  p_joint <- function(h0) {
+    e <- abs(resids(seq.int(T0 + 1L, Tn), h0))
+    Tt <- length(e)
+    block <- seq.int(Tt - T1 + 1L, Tt)
+    s <- vapply(seq_len(Tt),
+                function(sh) mean(e[((block - 1L + sh) %% Tt) + 1L]), 0)
+    mean(s >= s[Tt] - 1e-12)   # shift Tt is the identity block
+  }
+
+  # CI = {h0 : p(h0) > alpha}; expand a bracket out from the (always
+  # accepted) point estimate until rejected, then bisect to the boundary
+  ci_bounds <- function(pfun, center, scale) {
+    one <- function(dir) {
+      acc <- center
+      rej <- NULL
+      k <- scale
+      for (i in seq_len(60L)) {
+        h <- center + dir * k
+        if (pfun(h) <= alpha + 1e-12) { rej <- h; break }
+        acc <- h
+        k <- 2 * k
+      }
+      if (is.null(rej)) return(dir * Inf)
+      while (abs(rej - acc) > scale * 0.01) {
+        mid <- (acc + rej) / 2
+        if (pfun(mid) <= alpha + 1e-12) rej <- mid else acc <- mid
+      }
+      (acc + rej) / 2
+    }
+    c(one(-1), one(1))
+  }
+
+  ci <- matrix(NA_real_, T1, 2L)
+  p0 <- numeric(T1)
+  for (j in seq_len(T1)) {
+    scale <- max(stats::sd(resids(T0 + j, att[j])[pre]), 1e-10)
+    p0[j] <- p_point(j, 0)
+    ci[j, ] <- ci_bounds(function(h) p_point(j, h), att[j], scale)
+  }
+  avg <- mean(att)
+  scale <- max(stats::sd(resids(seq.int(T0 + 1L, Tn), avg)[pre]), 1e-10)
+  list(att = NULL, avg = NULL, ci = ci,
+       avg_ci = ci_bounds(p_joint, avg, scale),
+       p = p0, avg_p = p_joint(0),
+       level = level, method = "conformal", reps = NULL, draws = NULL)
 }

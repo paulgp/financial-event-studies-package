@@ -23,6 +23,11 @@ f_sc <- do.call(feventr::event_study, c(args, list(method = "sc", se = "placebo"
                                                    reps = 25, seed = 4)))
 
 expect_snapshot_plot(function() plot(f_mean), label = "fit_att_mean")
+
+# conformal band: stored CI bounds, deterministic (no seed needed)
+f_conf <- do.call(feventr::event_study, c(args, list(method = "sc",
+                                                     se = "conformal")))
+expect_snapshot_plot(function() plot(f_conf), label = "fit_att_sc_conformal")
 expect_snapshot_plot(function() plot(f_sc, what = "car"), label = "fit_car_sc")
 expect_snapshot_plot(function() plot(f_sc, what = "paths"), label = "fit_paths_sc")
 expect_snapshot_plot(function() plot(f_sc, what = "weights"), label = "fit_weights_sc")

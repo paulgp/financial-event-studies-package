@@ -12,7 +12,8 @@ solve_simplex_ls(
   support_size = NULL,
   eta = 0,
   max_iter = 2000,
-  tol = 1e-12
+  tol = 1e-12,
+  w0 = NULL
 )
 }
 \arguments{
@@ -33,6 +34,11 @@ after FW); default \code{min(n0, 5 * t0)}.}
 \item{eta}{Ridge penalty on the weights.}
 
 \item{max_iter, tol}{Frank-Wolfe iteration cap and minimum step size.}
+
+\item{w0}{Optional warm start (length n0): Frank-Wolfe is seeded with
+these weights (projected onto the simplex) instead of uniform. The
+hybrid KKT screen still verifies optimality, so a warm start changes
+the iteration count, not the solution. Ignored by \code{method = "qp"}.}
 }
 \value{
 \code{list(w, objective, iterations, support, method)}.
