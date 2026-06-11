@@ -19,7 +19,10 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: r/feventr
-          extra-packages: any::rcmdcheck
+          # synthdid (Suggests) is GitHub-only, not on CRAN
+          extra-packages: |
+            any::rcmdcheck
+            github::synth-inference/synthdid
           needs: check
       - uses: r-lib/actions/check-r-package@v2
         with:
