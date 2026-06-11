@@ -1,0 +1,29 @@
+"row","col","estimate"
+"CAPM Beta","Treated",1.42690718472004
+"CAPM Beta","Control",0.825092386949658
+"CAPM Beta","Control (All CRSP)",0.832826715794265
+"FF3F Market Beta","Treated",1.27461397747199
+"FF3F Market Beta","Control",0.658917688281179
+"FF3F Market Beta","Control (All CRSP)",0.857177690191486
+"FF3F Size Beta","Treated",0.233298840994636
+"FF3F Size Beta","Control",0.748703327598621
+"FF3F Size Beta","Control (All CRSP)",0.552986042715368
+"FF3F Value Beta","Treated",0.607076849540075
+"FF3F Value Beta","Control",0.719919990774086
+"FF3F Value Beta","Control (All CRSP)",0.143753229943116
+"CAPM Beta","Bank Controls SC",1.33124092307703
+"FF3F Market Beta","Bank Controls SC",1.14811003246782
+"FF3F Size Beta","Bank Controls SC",0.478356134509067
+"FF3F Value Beta","Bank Controls SC",0.748525437846117
+"CAPM Beta","Bank Controls SDID",1.1110913580774
+"FF3F Market Beta","Bank Controls SDID",0.904837463736865
+"FF3F Size Beta","Bank Controls SDID",0.818999255035227
+"FF3F Value Beta","Bank Controls SDID",0.872743436582549
+"CAPM Beta","All CRSP Controls SC",1.38346021355658
+"FF3F Market Beta","All CRSP Controls SC",1.22020595203617
+"FF3F Size Beta","All CRSP Controls SC",0.373995740103284
+"FF3F Value Beta","All CRSP Controls SC",0.674285947686841
+"CAPM Beta","All CRSP Controls SDID",1.28174525796216
+"FF3F Market Beta","All CRSP Controls SDID",1.16541662900187
+"FF3F Size Beta","All CRSP Controls SDID",0.627913956408232
+"FF3F Value Beta","All CRSP Controls SDID",0.593830927197341

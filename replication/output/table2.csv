@@ -1,0 +1,49 @@
+"panel","row","col","estimate","se"
+"A: Bank Controls","Schedule connections","Average",0.0263754527179596,0.00743129486110692
+"A: Bank Controls","Schedule connections","DID",0.0269999582253746,0.00654732790555243
+"A: Bank Controls","Schedule connections","SC",0.0160761683149195,0.00615390142230037
+"A: Bank Controls","Schedule connections","SDID",0.0176892241375499,0.00605935846152015
+"A: Bank Controls","Schedule connections","Gsynth",0.0124897937313492,0.00580673596120108
+"A: Bank Controls","Schedule connections","Market",0.0243111398147779,0.00687948974104806
+"A: Bank Controls","Schedule connections","CAPM",0.0153840920265156,0.00653055185655114
+"A: Bank Controls","Schedule connections","FF3F",0.0139457369318817,0.00631989080712955
+"A: Bank Controls","Personal connections","Average",0.0289435743984801,0.00954261248450417
+"A: Bank Controls","Personal connections","DID",0.0302358572105435,0.00844467980702481
+"A: Bank Controls","Personal connections","SC",0.00431868369216907,0.00764127357174716
+"A: Bank Controls","Personal connections","SDID",0.00904025828638655,0.0076061727238474
+"A: Bank Controls","Personal connections","Gsynth",0.00765289709007368,0.00750367031541006
+"A: Bank Controls","Personal connections","Market",0.0271272241029738,0.011809232708068
+"A: Bank Controls","Personal connections","CAPM",0.0151482419645967,0.0114802746772554
+"A: Bank Controls","Personal connections","FF3F",0.0127216428639779,0.0110804193809232
+"A: Bank Controls","New York connections","Average",0.0193687855044173,0.00477212896928848
+"A: Bank Controls","New York connections","DID",0.0202919927448429,0.00389356311406814
+"A: Bank Controls","New York connections","SC",0.00940243988447857,0.00334378950691882
+"A: Bank Controls","New York connections","SDID",0.0120931297994998,0.00342994879902446
+"A: Bank Controls","New York connections","Gsynth",0.00900222250763299,0.00390840613049311
+"A: Bank Controls","New York connections","Market",0.0166799183656421,0.00402110499275394
+"A: Bank Controls","New York connections","CAPM",0.0107545167813769,0.00378628919240003
+"A: Bank Controls","New York connections","FF3F",0.00932326538918823,0.00383582445740067
+"B: All Firm Controls","Schedule connections","Average",0.0197574228104792,0.00797311994037859
+"B: All Firm Controls","Schedule connections","DID",0.0198039024879817,0.00547823780866587
+"B: All Firm Controls","Schedule connections","SC",0.00408562004055911,0.00554733420794421
+"B: All Firm Controls","Schedule connections","SDID",0.00915677871133197,0.00512259730473172
+"B: All Firm Controls","Schedule connections","Gsynth",0.00104955924668457,0.0077006829603643
+"B: All Firm Controls","Personal connections","Average",0.0201473257841212,0.0102859563774725
+"B: All Firm Controls","Personal connections","DID",0.0208250218317726,0.00844664668862567
+"B: All Firm Controls","Personal connections","SC",-0.00307502769145986,0.00892141600555087
+"B: All Firm Controls","Personal connections","SDID",0.00553860954439903,0.00837532396060689
+"B: All Firm Controls","Personal connections","Gsynth",0.00327774090141439,0.00789381449084619
+"B: All Firm Controls","New York connections","Average",0.011184301821537,0.0049593849011832
+"B: All Firm Controls","New York connections","DID",0.0114621871216959,0.00340413704239781
+"B: All Firm Controls","New York connections","SC",0.00422803047237731,0.00378406803563341
+"B: All Firm Controls","New York connections","SDID",0.00334965128508881,0.00288618323172792
+"B: All Firm Controls","New York connections","Gsynth",0.00100527613254502,0.00378341762398108
+"B: All Firm Controls","Schedule connections","Market",0.0243111398147779,0.00687948974104806
+"B: All Firm Controls","Schedule connections","CAPM",0.0153840920265156,0.00653055185655114
+"B: All Firm Controls","Schedule connections","FF3F",0.0139457369318817,0.00631989080712955
+"B: All Firm Controls","Personal connections","Market",0.0271272241029738,0.011809232708068
+"B: All Firm Controls","Personal connections","CAPM",0.0151482419645967,0.0114802746772554
+"B: All Firm Controls","Personal connections","FF3F",0.0127216428639779,0.0110804193809232
+"B: All Firm Controls","New York connections","Market",0.0166799183656421,0.00402110499275394
+"B: All Firm Controls","New York connections","CAPM",0.0107545167813769,0.00378628919240003
+"B: All Firm Controls","New York connections","FF3F",0.00932326538918823,0.00383582445740067

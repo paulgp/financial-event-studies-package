@@ -13,8 +13,8 @@ Goldsmith-Pinkham & Lyu, *Causal Inference in Financial Event Studies*
 | 0 — Recon artifacts | **DONE 2026-06-10** | Targets transcribed + adversarially verified 7/7 (0 corrections); all 5 discrepancies resolved below |
 | 1 — Package core | **DONE 2026-06-10** (`da4a6d9`) | factor CARs ≡ lm() at 1e-10; DiD ≡ feols TWFE; `simulate_events` **bit-exact** vs published sim panel (seed 1234); Table 1 smoke shows the selection-bias pattern; 103 tests OK |
 | 2 — Fast synthetic engine | **DONE 2026-06-10** | hybrid/qp ≤1e-4 of CVXR (achieved ~1e-7); SC ≡ augsynth, SDID ≡ synthdid (τ̂ to 1e-6, ω/λ to 1e-4); ridge closed form verified; benchmark grid + real-data support check in `benchmarks/`; 138 tests OK |
-| 3 — Replication T1–T7 | pending | ±0.001 / ±0.1pp points; SEs ±20%; verifier sign-off per table |
-| 4 — Polish | pending | snapshots, vignettes, R CMD check, CI |
+| 3 — Replication T1–T7 | **DONE 2026-06-10** | All 7 tables adversarially verified (verdicts below): T1 144/144, T2 48/48 pts, T3 28/28, T4 62/64 (2 published cells proven stale literals), T5 20/20, T6 12/12, T7 20/20 |
+| 4 — Polish | **DONE 2026-06-10** | 163 tinytest results OK incl. 5 SVG snapshots; 2 vignettes; README w/ benchmarks; CI yaml; R CMD check --as-cran: 0 errors, 0 warnings, 2 environmental NOTEs |
 
 ## Decisions
 
@@ -174,12 +174,22 @@ Gsynth N=129,625 is a transposition of 129,165 (cannot be produced by any sample
   treated side rebuilt and verified to 5.9e-8. Verifier also confirmed N=14,847 through the
   full merge chain, the 6 cash+stock double-coded deals, and that the day-window convention
   ([-1,+1] = 3rd row) holds in 100% of the 14,618 runs.
-- **Tables 4–5 — pilot validated, full gsynth re-run in progress**: 82/84 cells within
-  tolerance now; the 2 failures are Table 4 random-control CAPM **Std** cells (2000s, 2010s)
-  traced to a *lost vintage* of the unseeded upstream random draw — our betas match the saved
-  draw artifact to 1e-7 and the *Mean* cells from the same regression sample match to <5e-4,
-  so the published Std cells are irreproducible in principle (documented data-vintage
-  deviation). Gsynth pilot: feventr reproduces saved counterfactuals on pilot cohorts exactly.
+- **Tables 4–5 — SIGNED OFF** (2026-06-10): Table 5 **20/20** (max |diff| 0.048pp), with the
+  four Gsynth decade cells from feventr's own full re-estimation of all fittable cohorts —
+  cohort set identical to the published vintage (613 = 613, both set differences empty; our
+  21 failures are exactly the zero-treated-firm cohorts; note cohort 635 is absent from the
+  panel .dta files themselves, refining the earlier "loop bug" framing). Verifier re-derived
+  the anndate→cohort mapping and decade aggregation independently (agreement 4e-15), refit 3
+  cohorts with the original gsynth call (path MAE ~2e-10), compared all 613 day+1 effects vs
+  the archived artifact (MAE 2e-10), and spot-recomputed 1990s treated betas from raw inputs
+  (mean 1.025172/sd 0.660208 vs published 1.025/0.660). Table 4 **62/64**; the 2 failing
+  random-control CAPM Std cells (2000s/2010s) are PROVEN stale: in the paper's assembly
+  workbook (`average_beta_index_inclusion_randcon_siblis.xlsx`), every cell links to the data
+  sheets via `=VALUE()` formulas EXCEPT E14/E19, which are hard-coded literals 0.985/0.997;
+  the workbook's own data sheets carry 0.663/0.595 — our values. A ~20-statistic battery on
+  the saved draw produced nothing matching the literals. The replication numbers are the
+  correct ones; published cells are manual-entry errata (provenance unknown, plausibly an
+  earlier draw vintage).
 - **Table 1 — SIGNED OFF** (2026-06-10): 144/144 cells within tolerance; max deviation vs
   published 0.005pp (bias) / 0.012 (coverage) ≈ 20×/2.5× inside tolerance. Verifier
   independently reimplemented the make_tables aggregation (matched to 2.7e-15), scanned ALL
@@ -188,4 +198,33 @@ Gsynth N=129,625 is a transposition of 129,165 (cannot be produced by any sample
   bootstrap, all post-event, each moving a cell by 0.002), confirmed the seed mapping
   (sim 7 panel agrees with the published saved panel to 5.6e-16), and falsified the panel
   mapping by deliberate swap (breaks 38 cells). No conditions.
-- **Tables 2–3 — run in progress** (Panel B gsynth fitting at time of writing).
+- **Tables 2–3 — first run REJECTED by verifier; bug found, fixed, rerun in progress.**
+  A first-pass claim that the SC/SDID misses were a "Stata-vs-R synthdid implementation
+  difference" was REFUTED by the adversarial verifier (an object lesson in why the
+  verification step exists): the supporting R-synthdid cross-check had consumed feventr's
+  own panel and inherited the bug. Actual root cause: `fes_panel()` mapped event time
+  *positionally*, but the `beforesdid` files ship with the placebo days −30..−1 already
+  deleted, so `est_window = c(-256, -31)` silently loaded dif −256..−61 (T0 = 196,
+  dropping the 30 most recent pre-event days). The verifier reproduced the published
+  SC/SDID cells exactly with BOTH Stata `sdid` (run locally; note: it installed the sdid
+  ado into the user Stata library as a side effect) and an independently-reshaped R
+  synthdid (agreement 1e-6), and showed feventr's engines on correctly-built panels
+  reproduce **all 12 SC/SDID + all 6 DID Table 2 cells and all 16 Table 3 Panel B cells**.
+  Fixes applied: (1) package — `align = "value"` option in `fes_panel`/`event_study`/
+  `event_study_batch` for time columns that are already event-time indices with missing
+  periods (+ regression tests); (2) `table3.R` all-CRSP Panel A control set = the panel's
+  control firms (the do-file merges betas into the panel), fixing the one Panel A miss
+  (FF3F Value 0.144). **Rerun: Table 2 = 48/48 points within ±0.001 (max |diff| 0.00085);
+  Table 3 = 28/28 cells within ±0.01 (max |diff| 0.003). RE-VERIFIED AND SIGNED OFF**
+  (second verifier: matched every cell against the first verifier's independently-built
+  reference values to ~2e-4, spot-refit SDID itself confirming T0 = 226 and att_avg
+  .017689, confirmed the regression tests). Remaining 7 SE gaps are all DID/SC/SDID
+  placebo cells (6 in the 9-treated Personal rows): published SEs used Stata sdid
+  vce(placebo) reps(10); a 12-seed reps=10 experiment brackets the published values
+  (0.0037–0.0096 vs published 0.003 for personal-SC), so these are rep-count sampling
+  noise in the PUBLISHED values — documented, points all match. The first verifier had
+  independently CONFIRMED:
+  Average col by hand (3/3 groups), Market/CAPM via lm(), beta provenance (−280..−31
+  reproduces the stored loadings to 6–8dp), gsynth 6/6, units, Ns (129,165/966,420),
+  treated counts, day-0 conventions, lossless comparison joins. Earlier "36/36" note was
+  a counting slip (30 cells across 5 columns; 36 including DID points).

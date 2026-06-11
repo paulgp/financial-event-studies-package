@@ -1,0 +1,65 @@
+"panel","row","col","estimate"
+"Panel A: 1980-1989","CAPM Beta","Treated Mean",0.960677633637008
+"Panel A: 1980-1989","CAPM Beta","Treated Std",0.522587802244176
+"Panel A: 1980-1989","CAPM Beta","Random Control Mean",0.581973945372518
+"Panel A: 1980-1989","CAPM Beta","Random Control Std",0.550737731650679
+"Panel A: 1980-1989","FF3F Mkt Beta","Treated Mean",1.10833539282766
+"Panel A: 1980-1989","FF3F Mkt Beta","Treated Std",0.538683229343811
+"Panel A: 1980-1989","FF3F Mkt Beta","Random Control Mean",0.8538279778488
+"Panel A: 1980-1989","FF3F Mkt Beta","Random Control Std",0.783771271841864
+"Panel A: 1980-1989","FF3F SMB Beta","Treated Mean",0.55824489255163
+"Panel A: 1980-1989","FF3F SMB Beta","Treated Std",0.603978249364118
+"Panel A: 1980-1989","FF3F SMB Beta","Random Control Mean",0.814688056454116
+"Panel A: 1980-1989","FF3F SMB Beta","Random Control Std",1.04428631896086
+"Panel A: 1980-1989","FF3F HML Beta","Treated Mean",-0.147583210333771
+"Panel A: 1980-1989","FF3F HML Beta","Treated Std",0.987290555665224
+"Panel A: 1980-1989","FF3F HML Beta","Random Control Mean",0.0211864905487041
+"Panel A: 1980-1989","FF3F HML Beta","Random Control Std",1.1884846624613
+"Panel B: 1990-1999","CAPM Beta","Treated Mean",1.02517168285152
+"Panel B: 1990-1999","CAPM Beta","Treated Std",0.660208056513466
+"Panel B: 1990-1999","CAPM Beta","Random Control Mean",0.650950787451714
+"Panel B: 1990-1999","CAPM Beta","Random Control Std",0.754343103527081
+"Panel B: 1990-1999","FF3F Mkt Beta","Treated Mean",1.17073249659761
+"Panel B: 1990-1999","FF3F Mkt Beta","Treated Std",0.659737458961532
+"Panel B: 1990-1999","FF3F Mkt Beta","Random Control Mean",0.873436134403962
+"Panel B: 1990-1999","FF3F Mkt Beta","Random Control Std",0.911368755503919
+"Panel B: 1990-1999","FF3F SMB Beta","Treated Mean",0.489059284846201
+"Panel B: 1990-1999","FF3F SMB Beta","Treated Std",0.660657008912
+"Panel B: 1990-1999","FF3F SMB Beta","Random Control Mean",0.804564877501403
+"Panel B: 1990-1999","FF3F SMB Beta","Random Control Std",1.21549887358523
+"Panel B: 1990-1999","FF3F HML Beta","Treated Mean",-0.0147771987062415
+"Panel B: 1990-1999","FF3F HML Beta","Treated Std",1.24209749805372
+"Panel B: 1990-1999","FF3F HML Beta","Random Control Mean",0.0219205703943721
+"Panel B: 1990-1999","FF3F HML Beta","Random Control Std",1.47478202489188
+"Panel B: 2000-2009","CAPM Beta","Treated Mean",1.08740504738397
+"Panel B: 2000-2009","CAPM Beta","Treated Std",0.697291830717623
+"Panel B: 2000-2009","CAPM Beta","Random Control Mean",0.823842099030677
+"Panel B: 2000-2009","CAPM Beta","Random Control Std",0.663073597452376
+"Panel B: 2000-2009","FF3F Mkt Beta","Treated Mean",1.07888793394734
+"Panel B: 2000-2009","FF3F Mkt Beta","Treated Std",0.560053921493768
+"Panel B: 2000-2009","FF3F Mkt Beta","Random Control Mean",0.820495148234676
+"Panel B: 2000-2009","FF3F Mkt Beta","Random Control Std",0.687884880084916
+"Panel B: 2000-2009","FF3F SMB Beta","Treated Mean",0.270982803230497
+"Panel B: 2000-2009","FF3F SMB Beta","Treated Std",0.674438207723399
+"Panel B: 2000-2009","FF3F SMB Beta","Random Control Mean",0.666510436815396
+"Panel B: 2000-2009","FF3F SMB Beta","Random Control Std",0.929091373335718
+"Panel B: 2000-2009","FF3F HML Beta","Treated Mean",-0.00168973490653983
+"Panel B: 2000-2009","FF3F HML Beta","Treated Std",1.2274313093802
+"Panel B: 2000-2009","FF3F HML Beta","Random Control Mean",0.075077685134355
+"Panel B: 2000-2009","FF3F HML Beta","Random Control Std",1.48213339116596
+"Panel D: 2010-2020","CAPM Beta","Treated Mean",1.05966522664891
+"Panel D: 2010-2020","CAPM Beta","Treated Std",0.388015614730663
+"Panel D: 2010-2020","CAPM Beta","Random Control Mean",0.973488377090508
+"Panel D: 2010-2020","CAPM Beta","Random Control Std",0.595059206498389
+"Panel D: 2010-2020","FF3F Mkt Beta","Treated Mean",1.02575788810915
+"Panel D: 2010-2020","FF3F Mkt Beta","Treated Std",0.343072843480557
+"Panel D: 2010-2020","FF3F Mkt Beta","Random Control Mean",0.871633049473396
+"Panel D: 2010-2020","FF3F Mkt Beta","Random Control Std",0.613641378784518
+"Panel D: 2010-2020","FF3F SMB Beta","Treated Mean",0.224839254415021
+"Panel D: 2010-2020","FF3F SMB Beta","Treated Std",0.519829804056445
+"Panel D: 2010-2020","FF3F SMB Beta","Random Control Mean",0.628459456135126
+"Panel D: 2010-2020","FF3F SMB Beta","Random Control Std",1.20122338457261
+"Panel D: 2010-2020","FF3F HML Beta","Treated Mean",-0.272966109411537
+"Panel D: 2010-2020","FF3F HML Beta","Treated Std",0.589919135712303
+"Panel D: 2010-2020","FF3F HML Beta","Random Control Mean",0.311195151631287
+"Panel D: 2010-2020","FF3F HML Beta","Random Control Std",1.27210512809618
