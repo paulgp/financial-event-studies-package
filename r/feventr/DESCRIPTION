@@ -17,6 +17,7 @@ Depends: R (>= 4.1.0)
 Imports: data.table, osqp, parallel, stats, utils
 Suggests: gsynth, CVXR, synthdid, fixest, tinytest, tinysnapshot,
     svglite, haven, knitr, rmarkdown
+Remotes: synth-inference/synthdid
 LazyData: true
 LazyDataCompression: xz
 VignetteBuilder: knitr
