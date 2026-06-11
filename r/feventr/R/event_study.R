@@ -22,6 +22,12 @@
 #' @param est_window Pre-event estimation/matching window; must end before
 #'   `window` starts. A gap between the two is allowed and those periods are
 #'   not loaded (e.g. an excluded placebo window).
+#' @param align How window offsets map to panel times: `"position"` (default;
+#'   offsets count positions among the panel's sorted unique times — trading
+#'   periods) or `"value"` (numeric time values used directly as offsets;
+#'   required when the time column is already an event-time index and some
+#'   periods are absent from the data, where positional counting would
+#'   silently shift the windows).
 #' @param returns `"simple"` or `"log"`; required, no default. Records the
 #'   return convention of `ret` and selects the default cumulation.
 #' @param cumulate How cumulative effects accumulate over the event window:
@@ -60,6 +66,7 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                                    "sc", "ridge", "sdid", "gsynth"),
                         window = c(0, 10), est_window = c(-250, -11), returns,
                         cumulate = c("auto", "sum", "compound", "log"),
+                        align = c("position", "value"),
                         factors = NULL, donors = NULL,
                         match_on = c("ret", "cumret"), V = NULL,
                         solver = c("hybrid", "fw", "qp"), lambda = NULL,
@@ -79,8 +86,10 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                  sc = , ridge = , sdid = "placebo",
                  gsynth = "bootstrap")
 
+  align <- match.arg(align)
   p <- fes_panel(data, unit, time, ret, treated, event_time,
-                 window = window, est_window = est_window, donors = donors)
+                 window = window, est_window = est_window, donors = donors,
+                 align = align)
 
   F <- if (method %in% c("market", "factor")) align_factors(factors, time, p)
   force <- match.arg(force)

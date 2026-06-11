@@ -14,7 +14,7 @@
 #' @param events Data frame: `unit`, `event_time`, optional `event` id (rows
 #'   sharing an id form one multi-unit event). Extra columns (e.g. decade,
 #'   deal type) are carried through to `$events` for grouped summaries.
-#' @param method,window,est_window,returns,cumulate,factors,match_on,V,solver,lambda,r,force
+#' @param method,window,est_window,returns,cumulate,align,factors,match_on,V,solver,lambda,r,force
 #'   As in [event_study()], applied to every event.
 #' @param exclude_treated Drop from each event's donor pool any unit with its
 #'   own event between `est_window[1]` and `window[2]` of this event (in
@@ -33,6 +33,7 @@ event_study_batch <- function(data, unit, time, ret, events,
                                          "sc", "ridge", "sdid", "gsynth"),
                               window = c(0, 10), est_window = c(-250, -11),
                               returns, cumulate = c("auto", "sum", "compound", "log"),
+                              align = c("position", "value"),
                               factors = NULL, exclude_treated = TRUE,
                               match_on = c("ret", "cumret"), V = NULL,
                               solver = c("hybrid", "fw", "qp"), lambda = NULL,
@@ -41,15 +42,17 @@ event_study_batch <- function(data, unit, time, ret, events,
                               keep_fits = FALSE) {
   method <- match.arg(method)
   se <- match.arg(se)
+  align <- match.arg(align)
   events <- as.data.frame(events)
   stopifnot(all(c("unit", "event_time") %in% names(events)))
   if (is.null(events$event))
     events$event <- seq_len(nrow(events))
   ids <- unique(events$event)
 
-  # positional offsets between any two event times, for donor exclusion
+  # offsets between any two event times, for donor exclusion
   times <- sort(unique(data[[time]]))
-  ev_pos <- match(events$event_time, times)
+  ev_pos <- if (align == "value") as.numeric(events$event_time)
+            else match(events$event_time, times)
   if (anyNA(ev_pos)) stop("some `event_time`s not found among panel times")
 
   fit_one <- function(eid) {
@@ -67,7 +70,7 @@ event_study_batch <- function(data, unit, time, ret, events,
                        event_time = events$event_time[rows][1],
                        method = method, window = window,
                        est_window = est_window, returns = returns,
-                       cumulate = cumulate, factors = factors,
+                       cumulate = cumulate, align = align, factors = factors,
                        donors = donors, match_on = match_on, V = V,
                        solver = solver, lambda = lambda, r = r, force = force,
                        se = "none", keep_data = FALSE)

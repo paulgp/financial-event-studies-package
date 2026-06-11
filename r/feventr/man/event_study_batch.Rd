@@ -15,6 +15,7 @@ event_study_batch(
   est_window = c(-250, -11),
   returns,
   cumulate = c("auto", "sum", "compound", "log"),
+  align = c("position", "value"),
   factors = NULL,
   exclude_treated = TRUE,
   match_on = c("ret", "cumret"),
@@ -29,34 +30,34 @@ event_study_batch(
 )
 }
 \arguments{
-\item{data, unit, time, ret}{As in [event_study()]: one long panel containing
+\item{data, unit, time, ret}{As in \code{\link[=event_study]{event_study()}}: one long panel containing
 all events' windows.}
 
-\item{events}{Data frame: `unit`, `event_time`, optional `event` id (rows
+\item{events}{Data frame: \code{unit}, \code{event_time}, optional \code{event} id (rows
 sharing an id form one multi-unit event). Extra columns (e.g. decade,
-deal type) are carried through to `$events` for grouped summaries.}
+deal type) are carried through to \verb{$events} for grouped summaries.}
 
-\item{method, window, est_window, returns, cumulate, factors, match_on, V, solver, lambda, r, force}{As in [event_study()], applied to every event.}
+\item{method, window, est_window, returns, cumulate, align, factors, match_on, V, solver, lambda, r, force}{As in \code{\link[=event_study]{event_study()}}, applied to every event.}
 
 \item{exclude_treated}{Drop from each event's donor pool any unit with its
-own event between `est_window[1]` and `window[2]` of this event (in
+own event between \code{est_window[1]} and \code{window[2]} of this event (in
 trading-period offsets), so contemporaneously-treated units never serve
 as donors.}
 
-\item{se}{`"cross"` (default): cross-event mean and `sd/sqrt(n)` per
-horizon; `"none"`.}
+\item{se}{\code{"cross"} (default): cross-event mean and \code{sd/sqrt(n)} per
+horizon; \code{"none"}.}
 
-\item{cores}{Events are fit with `parallel::mclapply(mc.cores = cores)`.}
+\item{cores}{Events are fit with \code{parallel::mclapply(mc.cores = cores)}.}
 
-\item{keep_fits}{Store the full per-event `fes_fit` list (memory-heavy).}
+\item{keep_fits}{Store the full per-event \code{fes_fit} list (memory-heavy).}
 }
 \value{
-An object of class `fes_batch`: `$att`/`$car` (cross-event mean
-  paths), `$se`, `$atts`/`$cars` (event x horizon matrices), `$events`
-  (input table + n_treated, n_donors, pre_rmse, status), `$fits` if kept.
+An object of class \code{fes_batch}: \verb{$att}/\verb{$car} (cross-event mean
+paths), \verb{$se}, \verb{$atts}/\verb{$cars} (event x horizon matrices), \verb{$events}
+(input table + n_treated, n_donors, pre_rmse, status), \verb{$fits} if kept.
 }
 \description{
-Fits [event_study()] once per event (each with its own event date, treated
+Fits \code{\link[=event_study]{event_study()}} once per event (each with its own event date, treated
 unit(s), and donor pool), then averages ATT paths across events with
 cross-event standard errors — the design of the index-inclusion and M&A
 applications. Per-event inference is deliberately off (cross-event

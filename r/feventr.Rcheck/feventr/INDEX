@@ -1,0 +1,15 @@
+event_betas             Factor-loading comparison of treated and
+                        control units
+event_study             Estimate the effect of a single event on
+                        financial returns
+event_study_batch       Estimate many events in one parallelized call
+ff_daily                Daily Fama-French factors, July 1926 - November
+                        2022
+plot.fes_batch          Plot cross-event average effects from a batch
+                        fit
+plot.fes_fit            Plot an event-study fit
+simulate_events         Simulate an event-study return panel with a
+                        two-factor structure
+solve_simplex_ls        Solve simplex-constrained least squares
+                        (synthetic-control weights)
+summary.fes_batch       Cross-event summary, optionally grouped

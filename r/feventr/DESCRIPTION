@@ -14,8 +14,11 @@ Description: Estimators for causal inference in financial event studies,
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
-Imports: data.table, osqp, stats, utils
-Suggests: gsynth, CVXR, synthdid, fixest, tinytest, tinysnapshot, haven
+Imports: data.table, osqp, parallel, stats, utils
+Suggests: gsynth, CVXR, synthdid, fixest, tinytest, tinysnapshot,
+    svglite, haven, knitr, rmarkdown
 LazyData: true
 LazyDataCompression: xz
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

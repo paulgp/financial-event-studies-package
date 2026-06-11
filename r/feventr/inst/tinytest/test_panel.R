@@ -64,3 +64,22 @@ p4 <- feventr:::fes_panel(d, "id", "t", "ret", treated = "u1",
                           est_window = c(-20, -5),
                           donors = c("u3", "u4"))
 expect_equal(p4$units[seq_len(p4$N0)], c("u3", "u4"))
+
+# align = "value": when the time column is already an event-time index and
+# some periods are pre-deleted from the data (the Geithner placebo-window
+# trap), positional counting silently shifts the windows; value alignment
+# must not. Build t = -20..3 with -4..-1 deleted:
+d5 <- mk_long(6, 24)
+d5$t <- d5$t - 21                      # t = -20..3
+d5 <- d5[!(d5$t %in% -4:-1), ]
+pv <- feventr:::fes_panel(d5, "id", "t", "ret", treated = "u1",
+                          event_time = 0, window = c(0, 3),
+                          est_window = c(-20, -5), align = "value")
+expect_equal(pv$times, c(-20:-5, 0:3))
+expect_equal(pv$T0, 16L)
+# positional alignment on the same gapped data shifts: t = -20 sits 16
+# positions before 0, so est_window c(-20,-5) loads only t -20..-9
+pp <- feventr:::fes_panel(d5, "id", "t", "ret", treated = "u1",
+                          event_time = 0, window = c(0, 3),
+                          est_window = c(-20, -5), align = "position")
+expect_equal(pp$T0, 12L)

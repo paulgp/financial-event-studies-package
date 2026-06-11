@@ -1,0 +1,29 @@
+Package: feventr
+Type: Package
+Title: Causal Inference for Financial Event Studies
+Version: 0.1.0
+Authors@R: person("Paul", "Goldsmith-Pinkham", email = "paulgp@gmail.com",
+    role = c("aut", "cre"))
+Description: Estimators for causal inference in financial event studies,
+    implementing the methods studied in Goldsmith-Pinkham and Lyu, "Causal
+    Inference in Financial Event Studies": difference baselines, factor-model
+    abnormal returns, fast synthetic control (Frank-Wolfe with support-restricted
+    QP polish), ridge-augmented synthetic control, synthetic
+    difference-in-differences, and generalized synthetic control, with a common
+    panel input and fit object across single-event and many-event batch modes.
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: data.table, osqp, parallel, stats, utils
+Suggests: gsynth, CVXR, synthdid, fixest, tinytest, tinysnapshot,
+        svglite, haven, knitr, rmarkdown
+LazyData: true
+LazyDataCompression: xz
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+NeedsCompilation: no
+Packaged: 2026-06-10 23:10:17 UTC; psg24
+Author: Paul Goldsmith-Pinkham [aut, cre]
+Maintainer: Paul Goldsmith-Pinkham <paulgp@gmail.com>
+Built: R 4.4.2; ; 2026-06-10 23:10:26 UTC; unix

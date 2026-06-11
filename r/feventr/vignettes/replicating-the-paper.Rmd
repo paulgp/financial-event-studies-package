@@ -1,0 +1,105 @@
+---
+title: "Replicating Goldsmith-Pinkham & Lyu (Tables 1–7)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Replicating Goldsmith-Pinkham & Lyu (Tables 1-7)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
+```
+
+The repository this package lives in ships, under `replication/`, the scripts
+that reproduce all seven tables of *Causal Inference in Financial Event
+Studies* with `feventr`. They require the paper's data repository (licensed
+CRSP/Compustat/SDC content) and run only on machines that have it; the
+package itself ships nothing but the Fama-French factors. This vignette
+documents the mapping. Published values were transcribed into
+`replication/targets/` and each script ends with a cell-by-cell comparison;
+per-table verification verdicts live in `PLAN.md`.
+
+## Table 1 — simulation bias and coverage
+
+`simulate_events()` mirrors the paper's DGP bit-for-bit (same RNG stream), so
+seeds 1234–1283 regenerate the published simulation panels exactly:
+
+```{r}
+sim <- simulate_events(selection = "both", seed = 1234)  # Panel D, sim 1
+```
+
+`replication/simulations/table1_full.R` runs 4 panels × 50 sims, applies the
+paper's estimators (diff-in-means, CAPM, correct two-factor structure, gsynth
+with `r=c(1, 40)`), and aggregates with the published formulas. All 144
+cells match within 0.005pp (bias) / 0.012 (coverage).
+
+## Tables 2–3 — the Geithner announcement
+
+One clustered event, 11-day post window, two control samples. The full
+estimator menu in one loop:
+
+```{r}
+fit <- event_study(banks, "index_ds", "dif", "ret",
+                   treated = schedule_connected, event_time = 0,
+                   method = "sdid",                 # or mean/did/market/...
+                   window = c(0, 10), est_window = c(-256, -31),
+                   returns = "simple", se = "placebo", reps = 100, seed = 123)
+```
+
+Conventions that matter (all verified against the original code): day 0 is
+the 3pm–close return; the placebo window (−30..−1) is excluded — a gap
+between `est_window` and `window` does exactly that; the published ATT is the
+average daily return over days 0–10, i.e. `fit$att_avg`. Table 3's weighted
+betas are `event_betas(fit, factors)` on the SC and SDID fits.
+
+## Tables 4–5 — S&P 500 index inclusion
+
+792 inclusion events. Announcement-day effects are measured at event day +1
+(announcements come after the close); factor loadings estimated on days
+−250..−101; gsynth treats event time ≥ −100 as treated with pre-period
+−280..−101:
+
+```{r}
+fit <- event_study(cohort_panel, "permno", "event_date", "daret",
+                   treated = included_permnos, event_time = 0,
+                   method = "gsynth", force = "unit", r = c(1, 10),
+                   window = c(-100, 20), est_window = c(-280, -101),
+                   returns = "simple", se = "none")
+fit$att[["1"]]   # the announcement-day effect
+```
+
+`replication/index_inclusion/` runs all 635 announcement-date cohorts with
+checkpointing.
+
+## Table 6 — M&A acquirer CARs
+
+14,847 deals; the published cells are *log* CARs over [−1, +1]:
+
+```{r}
+event_study(..., method = "gsynth", window = c(-30, 250),
+            est_window = c(-280, -31), returns = "simple", cumulate = "log")
+```
+
+The three-day effect is the difference of the cumulative-effect path,
+`car["1"] - car["-2"]`, or directly from `$paths`. The raw per-deal event
+panels are not redistributable; the replication validates the live gsynth
+path on rebuilt panels for a sample of deals (counterfactuals agree with the
+archived run to ~1e-9) and recomputes the aggregation from the archived
+day-level output.
+
+## Table 7 — close merger contests
+
+Monthly frequency. Event time is positional, so nothing changes in the API —
+the panel's time column is simply a month index. Winner/loser betas are
+per-firm OLS over months −35..−1, compared with Welch t-tests
+(`replication/contests/table7.R`; all 20 cells within rounding).
+
+## Tolerances and deviations
+
+Point estimates: ±0.001 (decimal returns) or ±0.1pp; SEs: ±20% (placebo and
+bootstrap SEs are seed-dependent; the original pipelines were partly
+unseeded). Where the paper's text and its code disagree (estimation windows,
+return conventions), the code wins and the discrepancy is documented in
+`PLAN.md` — notably Table 6's loadings window (−280..−31, not the stated
+−250..−100) and Table 7's monthly (not daily) betas.

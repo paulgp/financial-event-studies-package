@@ -16,6 +16,7 @@ event_study(
   est_window = c(-250, -11),
   returns,
   cumulate = c("auto", "sum", "compound", "log"),
+  align = c("position", "value"),
   factors = NULL,
   donors = NULL,
   match_on = c("ret", "cumret"),
@@ -33,74 +34,81 @@ event_study(
 \arguments{
 \item{data}{Long panel: one row per unit-time, with return observations.}
 
-\item{unit, time, ret}{Column names (strings) in `data`.}
+\item{unit, time, ret}{Column names (strings) in \code{data}.}
 
 \item{treated}{Character vector of treated unit ids.}
 
-\item{event_time}{The value of `time` that is event day 0. Event time is
+\item{event_time}{The value of \code{time} that is event day 0. Event time is
 positional within the panel's sorted unique times (trading periods).
-For partial event days (e.g. Geithner's 3pm-close day 0), `data` must
+For partial event days (e.g. Geithner's 3pm-close day 0), \code{data} must
 already contain the partial-day return as the day-0 observation.}
 
-\item{method}{Estimator. `"mean"` (difference in means), `"did"`,
-`"market"` (market-adjusted: loading fixed at 1, no intercept, on the
-single factor column), `"factor"` (per-unit OLS loadings on the supplied
-factor columns; CAPM = one column, FF3F = three), `"sc"`, `"ridge"`,
-`"sdid"`, `"gsynth"`.}
+\item{method}{Estimator. \code{"mean"} (difference in means), \code{"did"},
+\code{"market"} (market-adjusted: loading fixed at 1, no intercept, on the
+single factor column), \code{"factor"} (per-unit OLS loadings on the supplied
+factor columns; CAPM = one column, FF3F = three), \code{"sc"}, \code{"ridge"},
+\code{"sdid"}, \code{"gsynth"}.}
 
-\item{window}{Event window in trading-period offsets, e.g. `c(0, 10)`.}
+\item{window}{Event window in trading-period offsets, e.g. \code{c(0, 10)}.}
 
 \item{est_window}{Pre-event estimation/matching window; must end before
-`window` starts. A gap between the two is allowed and those periods are
+\code{window} starts. A gap between the two is allowed and those periods are
 not loaded (e.g. an excluded placebo window).}
 
-\item{returns}{`"simple"` or `"log"`; required, no default. Records the
-return convention of `ret` and selects the default cumulation.}
+\item{returns}{\code{"simple"} or \code{"log"}; required, no default. Records the
+return convention of \code{ret} and selects the default cumulation.}
 
 \item{cumulate}{How cumulative effects accumulate over the event window:
-`"sum"`, `"compound"` (gross-return products differenced), or `"log"`
-(sum of log gross-return differences). `"auto"` = sum for log returns,
+\code{"sum"}, \code{"compound"} (gross-return products differenced), or \code{"log"}
+(sum of log gross-return differences). \code{"auto"} = sum for log returns,
 compound for simple returns.}
 
-\item{factors}{Data frame with the panel `time` column plus numeric factor
+\item{align}{How window offsets map to panel times: \code{"position"} (default;
+offsets count positions among the panel's sorted unique times — trading
+periods) or \code{"value"} (numeric time values used directly as offsets;
+required when the time column is already an event-time index and some
+periods are absent from the data, where positional counting would
+silently shift the windows).}
+
+\item{factors}{Data frame with the panel \code{time} column plus numeric factor
 columns, covering every period in both windows. Required for
-`"market"`/`"factor"`. Excess-return adjustment (subtracting rf) is the
+\code{"market"}/\code{"factor"}. Excess-return adjustment (subtracting rf) is the
 caller's responsibility.}
 
 \item{donors}{Optional character vector restricting the donor pool;
 default all non-treated units. Units without complete history over the
-loaded windows are dropped (recorded in `diagnostics$dropped`).}
+loaded windows are dropped (recorded in \code{diagnostics$dropped}).}
 
 \item{match_on}{For synthetic methods: match on per-period returns
-(`"ret"`, the paper's convention) or cumulated pre-event paths
-(`"cumret"`).}
+(\code{"ret"}, the paper's convention) or cumulated pre-event paths
+(\code{"cumret"}).}
 
 \item{V}{Optional time-weighting matrix (length-T0 vector or T0 x T0
 matrix) for the synthetic-control objective; default identity.}
 
-\item{solver}{Simplex solver for `"sc"`/`"ridge"`: `"hybrid"`
-(Frank-Wolfe + support-restricted QP polish, default), `"fw"`, `"qp"`.}
+\item{solver}{Simplex solver for \code{"sc"}/\code{"ridge"}: \code{"hybrid"}
+(Frank-Wolfe + support-restricted QP polish, default), \code{"fw"}, \code{"qp"}.}
 
-\item{lambda}{Ridge penalty for `"ridge"`; `NULL` = cross-validated.}
+\item{lambda}{Ridge penalty for \code{"ridge"}; \code{NULL} = cross-validated.}
 
-\item{r}{Factor-number range for `"gsynth"` cross-validation.}
+\item{r}{Factor-number range for \code{"gsynth"} cross-validation.}
 
-\item{force}{Fixed effects for `"gsynth"`: `"unit"` (default), `"none"`,
-or `"two-way"`.}
+\item{force}{Fixed effects for \code{"gsynth"}: \code{"unit"} (default), \code{"none"},
+or \code{"two-way"}.}
 
-\item{se}{Inference: `"auto"` maps mean/did/market/factor to `"tstat"`,
-sc/ridge/sdid to `"placebo"`, gsynth to `"bootstrap"`. `"none"` skips.}
+\item{se}{Inference: \code{"auto"} maps mean/did/market/factor to \code{"tstat"},
+sc/ridge/sdid to \code{"placebo"}, gsynth to \code{"bootstrap"}. \code{"none"} skips.}
 
-\item{reps}{Placebo repetitions / bootstrap draws (`NULL` = method
+\item{reps}{Placebo repetitions / bootstrap draws (\code{NULL} = method
 default: 100 placebo, 1000 bootstrap).}
 
 \item{keep_data}{Store the panel matrices in the fit (needed for plots,
-`event_betas()`, placebo inference re-runs).}
+\code{event_betas()}, placebo inference re-runs).}
 
 \item{seed}{Optional RNG seed for placebo/bootstrap inference.}
 }
 \value{
-An object of class `fes_fit`.
+An object of class \code{fes_fit}.
 }
 \description{
 Fits one of the event-study estimators on a long unit x time return panel
