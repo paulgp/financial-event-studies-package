@@ -1,0 +1,4 @@
+r/feventr.Rcheck/
+r/*.log
+r/feventr_*.tar.gz
+.DS_Store
