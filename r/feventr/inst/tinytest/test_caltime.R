@@ -110,6 +110,18 @@ ct_val <- feventr::calendar_time(gap, "id", "t", "ret", events = ev,
 expect_true(!35 %in% ct_val$portfolio$time)
 expect_true(abs(ct_val$alpha - tau) < 4 * ct_val$alpha_se)
 
+# align = "value" with a non-numeric time column errors with the right
+# diagnosis, not the misleading position-path message (issue 15)
+gap_chr <- gap
+gap_chr$t <- as.character(gap_chr$t)
+ev_chr <- ev
+ev_chr$event_time <- as.character(ev_chr$event_time)
+expect_error(
+  feventr::calendar_time(gap_chr, "id", "t", "ret", events = ev_chr,
+                         window = win, returns = "simple", align = "value"),
+  "numeric time column"
+)
+
 # methods
 expect_stdout(print(ct), pattern = "calendar-time portfolio")
 expect_equal(unname(coef(ct)["alpha"]), ct$alpha)

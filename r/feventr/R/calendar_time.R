@@ -51,6 +51,13 @@ calendar_time <- function(data, unit, time, ret, events, window = c(0, 10),
   stopifnot(all(c("unit", "event_time") %in% names(events)),
             length(window) == 2L, window[1] <= window[2])
 
+  # mirror fes_panel's guard: value alignment uses the time values directly as
+  # offsets, so a non-numeric time column would silently coerce to NA (and
+  # misfire the position-path "event_times not found" message) — reject it up
+  # front with the same diagnosis
+  if (align == "value" &&
+      (!is.numeric(data[[time]]) || !is.numeric(events$event_time)))
+    stop("align = 'value' needs a numeric time column")
   times <- sort(unique(data[[time]]))
   pos_of <- function(v) if (align == "value") as.numeric(v) else match(v, times)
   ev_pos <- pos_of(events$event_time)
