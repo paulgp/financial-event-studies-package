@@ -138,10 +138,13 @@ print.fes_batch <- function(x, ...) {
   okn <- sum(x$events$status == "ok")
   cat("feventr batch fit: method '", x$method, "', ", okn, "/",
       nrow(x$events), " events\n", sep = "")
-  cat("ATT (cross-event avg) at horizon 0: ",
-      formatC(x$att[["0"]], digits = 4, format = "f"),
+  # att names are the post-window offsets; window = c(1, 10) or a gapped
+  # value-aligned panel need not contain "0", so pick the first available
+  h0 <- if ("0" %in% names(x$att)) "0" else names(x$att)[1]
+  cat("ATT (cross-event avg) at horizon ", h0, ": ",
+      formatC(x$att[[h0]], digits = 4, format = "f"),
       if (!is.null(x$se)) paste0(" (se ",
-                                 formatC(x$se$att[["0"]], digits = 4, format = "f"), ")"),
+                                 formatC(x$se$att[[h0]], digits = 4, format = "f"), ")"),
       "\n", sep = "")
   invisible(x)
 }

@@ -73,6 +73,15 @@ expect_true(grepl("dropped", b_edge$events$status[b_edge$events$event == "e4"]))
 expect_equal(nrow(b_edge$atts), 3L)             # only the 3 covered events
 expect_equal(colnames(b_edge$atts), as.character(0:5))
 
+# print works when the window excludes offset 0 (issue 11): att names are
+# "1".."5", which the old hard-coded x$att[["0"]] turned into a crash
+b_nz <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
+                                   method = "mean", window = c(1, 5),
+                                   est_window = c(-40, -1), returns = "simple",
+                                   se = "cross")
+expect_false("0" %in% names(b_nz$att))
+expect_stdout(print(b_nz), pattern = "horizon 1")
+
 # sc engine through batch
 bsc <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
                                   method = "sc", window = c(0, 5),
