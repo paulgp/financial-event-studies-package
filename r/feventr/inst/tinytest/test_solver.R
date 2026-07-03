@@ -118,6 +118,27 @@ expect_true(is.finite(fit_rcv$diagnostics$info$lambda))
 # augmentation can only improve pre-period fit
 expect_true(fit_rcv$diagnostics$info$pre_rmse <= fit_sc$diagnostics$info$pre_rmse + 1e-12)
 
+# match_on = 'cumret': the ridge augmentation must correct the *cumret*
+# imbalance the base weights minimize, not the raw-return imbalance (issue 3).
+# The augmented weights equal the closed form built from the cumret matching
+# matrix, not from per-period returns.
+fit_rc <- do.call(feventr::event_study,
+                  c(args, list(method = "ridge", lambda = 1, match_on = "cumret")))
+pnc <- fit_rc$panel
+pre_c <- seq_len(pnc$T0)
+Xc <- apply(pnc$Y[seq_len(pnc$N0), pre_c, drop = FALSE], 1, cumsum)   # t0 x n0
+xc1 <- cumsum(colMeans(pnc$Y[-seq_len(pnc$N0), pre_c, drop = FALSE]))
+wsc_c <- unname(fit_rc$weights$omega_sc)
+w_man_c <- wsc_c + as.vector(crossprod(Xc, solve(tcrossprod(Xc) + diag(1, pnc$T0),
+                                                 xc1 - as.vector(Xc %*% wsc_c))))
+expect_equal(unname(fit_rc$weights$omega), w_man_c, tolerance = 1e-8)
+# and it differs from the (buggy) raw-return augmentation
+X0c <- t(pnc$Y[seq_len(pnc$N0), pre_c, drop = FALSE])
+x1c <- colMeans(pnc$Y[-seq_len(pnc$N0), pre_c, drop = FALSE])
+w_raw <- wsc_c + as.vector(crossprod(X0c, solve(tcrossprod(X0c) + diag(1, pnc$T0),
+                                                x1c - as.vector(X0c %*% wsc_c))))
+expect_true(max(abs(w_man_c - w_raw)) > 1e-6)
+
 # placebo inference populates draws and SEs
 fit_pl <- do.call(feventr::event_study,
                   c(args[setdiff(names(args), "se")],

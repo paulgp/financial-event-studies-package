@@ -90,8 +90,18 @@ eng_ridge_sc <- function(Y, N0, T0, Ymatch = NULL, V = NULL, lambda = NULL,
   base <- eng_sc(Y, N0, T0, Ymatch = Ymatch, V = V, solver = solver,
                  support_size = support_size, max_iter = max_iter, w0 = w0)
   w_sc <- unname(base$weights$omega)
-  X0 <- t(Y[seq_len(N0), seq_len(T0), drop = FALSE])   # t0 x n0
-  x1 <- colMeans(Y[-seq_len(N0), seq_len(T0), drop = FALSE])
+  # Augment against the same matched representation the base weights minimize:
+  # per-period returns (Ymatch = NULL, the paper's convention) or the caller's
+  # matching matrix (e.g. cumulated pre-event paths for match_on = 'cumret').
+  # Building X0/x1 from raw returns regardless of Ymatch would correct a
+  # different imbalance than the one w_sc was chosen to balance.
+  if (is.null(Ymatch)) {
+    X0 <- t(Y[seq_len(N0), seq_len(T0), drop = FALSE])   # t0 x n0
+    x1 <- colMeans(Y[-seq_len(N0), seq_len(T0), drop = FALSE])
+  } else {
+    X0 <- Ymatch                                          # t0 x n0 (matched)
+    x1 <- attr(Ymatch, "b")
+  }
   ridge_w <- function(l, X, y, w) {
     resid <- y - as.vector(X %*% w)
     w + as.vector(crossprod(X, solve(tcrossprod(X) + diag(l, nrow(X)), resid)))
