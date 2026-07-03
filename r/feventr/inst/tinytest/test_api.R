@@ -48,6 +48,23 @@ expect_error(
   do.call(feventr::event_study, c(args, list(method = "sc", se = "tstat"))),
   pattern = "tstat")
 
+# single treated unit: tstat falls back to the classic single-firm event-study
+# SE (time-series sd of estimation-window abnormal returns) instead of the
+# all-NA cross-sectional sd of a 1-row matrix (issue 14)
+a1 <- args
+a1$method <- "market"
+a1$treated <- sim$events$unit[1]
+a1$factors <- data.frame(t = sim$factors$t, mkt = sim$factors$mktrf)
+f1u <- do.call(feventr::event_study, a1)
+expect_true(all(is.finite(f1u$se$att)) && is.finite(f1u$att_avg_se))
+expect_true(all(is.finite(confint(f1u))))
+# equals sd of the estimation-window abnormal returns (market: ret - mkt)
+pn1 <- f1u$panel
+tr1 <- pn1$Y[nrow(pn1$Y), ]
+mkt1 <- a1$factors$mkt[match(pn1$time_values, a1$factors$t)]
+sigma1 <- stats::sd((tr1 - mkt1)[seq_len(pn1$T0)])
+expect_equal(unname(f1u$se$att), rep(sigma1, length(f1u$att)), tolerance = 1e-10)
+
 # se = "none" skips inference
 f0 <- do.call(feventr::event_study, c(args, list(method = "mean", se = "none")))
 expect_null(f0$se)

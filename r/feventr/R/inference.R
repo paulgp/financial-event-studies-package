@@ -11,11 +11,23 @@
 inf_tstat <- function(Y, N0, T0, eng, method) {
   post <- seq.int(T0 + 1L, ncol(Y))
   if (method %in% c("market", "factor")) {
-    ar <- (Y[-seq_len(N0), , drop = FALSE] - eng$info$y0hat_units)[, post, drop = FALSE]
-    att_se <- apply(ar, 2L, stats::sd) / sqrt(nrow(ar))
-    pooled <- as.vector(ar)
-    avg_se <- stats::sd(pooled) / sqrt(length(pooled))
-    df <- length(pooled) - 1L
+    ar_full <- Y[-seq_len(N0), , drop = FALSE] - eng$info$y0hat_units
+    ar <- ar_full[, post, drop = FALSE]
+    if (nrow(ar) == 1L) {
+      # single treated unit: the cross-sectional sd is NA (one observation per
+      # period), so use the classic single-firm event-study SE — the time
+      # series sd of the estimation-window abnormal returns (MacKinlay 1997),
+      # with df reduced by the number of estimated factor coefficients
+      sigma <- stats::sd(ar_full[, seq_len(T0)])
+      att_se <- rep(sigma, length(post))
+      avg_se <- sigma / sqrt(length(post))
+      df <- T0 - ncol(eng$weights$beta)
+    } else {
+      att_se <- apply(ar, 2L, stats::sd) / sqrt(nrow(ar))
+      pooled <- as.vector(ar)
+      avg_se <- stats::sd(pooled) / sqrt(length(pooled))
+      df <- length(pooled) - 1L
+    }
   } else {
     trt <- Y[-seq_len(N0), post, drop = FALSE]
     ctl <- Y[seq_len(N0), post, drop = FALSE]
