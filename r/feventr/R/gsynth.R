@@ -7,8 +7,7 @@
 # replication scripts' `treated = treat * (event_date >= onset)` convention.
 
 eng_gsynth <- function(Y, N0, T0, r = c(0, 5), force = "unit",
-                       se = FALSE, nboots = 1000, parallel = FALSE,
-                       times = NULL) {
+                       se = FALSE, nboots = 1000, parallel = FALSE) {
   if (!requireNamespace("gsynth", quietly = TRUE))
     stop("method 'gsynth' requires the gsynth package")
   Tn <- ncol(Y)
