@@ -54,8 +54,22 @@ inf_placebo <- function(Y, N0, T0, n_treated, refit, reps = 100, seed = NULL,
                 Y[fake, , drop = FALSE])
     refit(Yp, N0 - n_treated, T0)$tau
   }
-  taus <- if (cores > 1L) parallel::mclapply(fakes, fit_one, mc.cores = cores)
+  par_ok <- cores > 1L && .Platform$OS.type != "windows"
+  if (cores > 1L && .Platform$OS.type == "windows")
+    warning("parallel placebo refits are not supported on Windows; ",
+            "running serially (mc.cores forced to 1)")
+  taus <- if (par_ok) parallel::mclapply(fakes, fit_one, mc.cores = cores)
           else lapply(fakes, fit_one)
+  # mclapply reports a forked error as a try-error slot (only a warning) and a
+  # killed fork as NULL; unchecked, rbind coerces to character (cryptic
+  # rowMeans crash) or silently drops rows (SEs over fewer than `reps` draws)
+  bad <- vapply(taus, function(t) is.null(t) || inherits(t, "try-error"), TRUE)
+  if (any(bad)) {
+    first <- taus[bad][[1]]
+    detail <- if (inherits(first, "try-error"))
+      conditionMessage(attr(first, "condition")) else "fork killed (NULL result)"
+    stop(sum(bad), " of ", reps, " placebo refit(s) failed; first: ", detail)
+  }
   draws <- do.call(rbind, taus)
   avg <- rowMeans(draws)
   list(att = apply(draws, 2L, stats::sd),

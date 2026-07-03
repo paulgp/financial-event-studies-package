@@ -136,3 +136,13 @@ p_par <- feventr:::inf_placebo(Y, N0, T0, n_treated = N1, refit = refit_sc,
                                reps = 20, seed = 7, cores = 2L)
 expect_identical(p_par$draws, p_ser$draws)
 expect_identical(p_par$att, p_ser$att)
+
+# a failing refit surfaces a clear error, not a cryptic rowMeans/character
+# coercion crash or silently-dropped draws (issue 13). "boom" appears both in
+# the serial throw and in the wrapped parallel try-error message.
+boom_refit <- function(Y, N0, T0, w0 = NULL) stop("boom")
+expect_error(
+  feventr:::inf_placebo(Y, N0, T0, n_treated = N1, refit = boom_refit,
+                        reps = 4, seed = 1, cores = 2L),
+  "boom"
+)
