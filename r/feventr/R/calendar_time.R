@@ -74,6 +74,12 @@ calendar_time <- function(data, unit, time, ret, events, window = c(0, 10),
   # (a unit's first listed period commonly lacks a lagged market cap).
   if (!is.null(weight)) keep <- keep & !is.na(data[[weight]])
 
+  # a duplicated (unit, time) row would double-count that firm in rowsum
+  # (over-weighting its return and overstating n_units); reject it as
+  # fes_panel does, rather than counting rows as if they were distinct units
+  if (anyDuplicated(cbind(d_u[keep], d_p[keep])))
+    stop("duplicate unit-time rows in `data`")
+
   r <- data[[ret]][keep]
   p <- d_p[keep]
   w <- if (is.null(weight)) rep(1, length(r)) else data[[weight]][keep]

@@ -49,6 +49,21 @@ ct_dup <- feventr::calendar_time(long, "id", "t", "ret", events = ev_dup,
                                  window = win, factors = fac, returns = "simple")
 expect_equal(ct_dup$alpha, ct$alpha, tolerance = 1e-12)
 
+# a duplicated (unit, time) row inside a window is rejected, not silently
+# double-counted, matching event_study()/fes_panel (issue 8)
+dup_row <- long[long$id == "u01" & long$t == ev$event_time[1], ]
+expect_error(
+  feventr::calendar_time(rbind(long, dup_row), "id", "t", "ret", events = ev,
+                         window = win, factors = fac, returns = "simple"),
+  "duplicate"
+)
+# a duplicate outside every window is harmless (never enters `keep`)
+dup_out <- long[long$id == "u01" & long$t == 1, ]
+expect_silent(
+  feventr::calendar_time(rbind(long, dup_out), "id", "t", "ret", events = ev,
+                         window = win, factors = fac, returns = "simple")
+)
+
 # value weighting: put all weight on one member unit
 long$mcap <- ifelse(long$id == "u01", 1, 1e-12)
 ct_vw <- feventr::calendar_time(long, "id", "t", "ret", events = ev[1, , drop = FALSE],
