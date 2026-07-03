@@ -25,6 +25,18 @@ sima <- feventr::simulate_events(selection = "assignment", seed = 13)
 expect_true(mean(sima$betas$b_smb[sima$betas$treated]) <
               mean(sima$betas$b_smb[!sima$betas$treated]))
 
+# timing selection stays scalar when candidate days tie on SMB (issue 10):
+# all-equal SMB makes every candidate day tie, which the old which(sub ==
+# min(sub)) turned into a length > 1 event_time that corrupts the events table
+ftie <- data.frame(mktrf = rnorm(40, 0, 0.01), smb = rep(0.005, 40),
+                   rf = rep(1e-4, 40))
+simtie <- feventr::simulate_events(n_units = 40, n_pre = 3, n_candidate = 5,
+                                   n_post = 2, treat_share = 0.5,
+                                   selection = "timing", factors = ftie,
+                                   seed = 3)
+expect_equal(length(simtie$event_time), 1L)
+expect_equal(nrow(simtie$events), sum(simtie$betas$treated))
+
 # --- bit-exact replication of the published simulated panels -----------------
 # The published runs saved their panels for the assignment-selection config;
 # seed for sim_idx i is 1234 + i - 1.

@@ -82,7 +82,10 @@ simulate_events <- function(n_units = 500, n_pre = 239, n_candidate = 250,
     sub <- max(sub) - sub + 1
     scale_factor <- log(1 / n_candidate) / mean(sub)
     selected <- stats::rbinom(n_candidate, 1, stats::plogis(scale_factor * sub)) == 1
-    event_time <- P - 1L + unname(which(sub == min(sub)))  # the max-SMB candidate day
+    # which.min keeps this scalar: rounded SMB values tie (only ~600 distinct
+    # values), and which(sub == min(sub)) would return every tied day, making
+    # event_time a length > 1 vector that corrupts the events table
+    event_time <- P - 1L + unname(which.min(sub))  # the max-SMB candidate day
   } else {
     event_time <- P
   }
