@@ -67,6 +67,16 @@ fes_panel <- function(data, unit, time, ret, treated, event_time,
 
   complete <- rowSums(is.na(Y)) == 0L
   dropped <- data.frame(unit = character(), reason = character())
+  # treated ids absent from the panel (typo, ticker-case mismatch) would never
+  # reach the incomplete-history drop below and would silently shrink the
+  # treated set; flag them explicitly and record the drop
+  missing_tr <- setdiff(treated, units)
+  if (length(missing_tr)) {
+    warning(length(missing_tr), " treated unit(s) not found in `data`: ",
+            paste(missing_tr, collapse = ", "))
+    dropped <- rbind(dropped, data.frame(unit = missing_tr,
+                                         reason = "treated: not in panel"))
+  }
   drop_tr <- intersect(treated, units[!complete])
   if (length(drop_tr)) {
     warning(length(drop_tr), " treated unit(s) dropped: incomplete history")

@@ -79,6 +79,17 @@ expect_silent(
                       window = c(0, 3), est_window = c(-40, -5))
 )
 
+# a treated id absent from the panel (typo) is flagged, not silently dropped,
+# and recorded in `dropped` (issue 9)
+expect_warning(
+  p_miss <- feventr:::fes_panel(d, "id", "t", "ret",
+                               treated = c("u1", "u2", "nope"), event_time = 25,
+                               window = c(0, 3), est_window = c(-20, -5)),
+  "not found"
+)
+expect_true("nope" %in% p_miss$dropped$unit)
+expect_equal(sort(p_miss$treated), c("u1", "u2"))
+
 # donors= restricts the pool
 p4 <- feventr:::fes_panel(d, "id", "t", "ret", treated = "u1",
                           event_time = 25, window = c(0, 3),
