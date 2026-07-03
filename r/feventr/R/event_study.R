@@ -137,6 +137,12 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                  nboots = if (is.null(reps)) 1000L else reps))
   eng <- refit(p$Y, p$N0, p$T0)
 
+  # Freeze the CV-selected ridge lambda: the refit closure reads `lambda`
+  # lazily, so this makes every placebo/conformal refit reuse the base fit's
+  # penalty instead of re-running the full leave-one-out CV each time (and
+  # re-tuning the penalty under each null is not what refit-under-null wants).
+  if (method == "ridge" && is.null(lambda)) lambda <- eng$info$lambda
+
   if (p$T0 >= ncol(p$Y))
     stop("no event-window periods remain after the estimation window (T0 = ",
          p$T0, ", periods = ", ncol(p$Y), ")")

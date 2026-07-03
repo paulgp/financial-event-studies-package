@@ -118,6 +118,32 @@ expect_true(is.finite(fit_rcv$diagnostics$info$lambda))
 # augmentation can only improve pre-period fit
 expect_true(fit_rcv$diagnostics$info$pre_rmse <= fit_sc$diagnostics$info$pre_rmse + 1e-12)
 
+# the closed-form leave-one-out CV selects the same lambda as the naive
+# n_lambda x T0 double loop it replaced (issue 16)
+pnr <- fit_rcv$panel
+X0r <- t(pnr$Y[seq_len(pnr$N0), seq_len(pnr$T0), drop = FALSE])
+x1r <- colMeans(pnr$Y[-seq_len(pnr$N0), seq_len(pnr$T0), drop = FALSE])
+wsc_r <- unname(fit_rcv$weights$omega_sc)
+ridge_w <- function(l, X, y, w) {
+  rr <- y - as.vector(X %*% w)
+  w + as.vector(crossprod(X, solve(tcrossprod(X) + diag(l, nrow(X)), rr)))
+}
+smax_r <- svd(X0r, nu = 0, nv = 0)$d[1]
+grid_r <- exp(seq(log(smax_r^2), log(smax_r^2 * 1e-8), length.out = 20))
+cv_naive <- vapply(grid_r, function(l) sum(vapply(seq_len(pnr$T0), function(j) {
+  wj <- ridge_w(l, X0r[-j, , drop = FALSE], x1r[-j], wsc_r)
+  (x1r[j] - sum(X0r[j, ] * wj))^2
+}, 0)), 0)
+expect_equal(fit_rcv$diagnostics$info$lambda, grid_r[which.min(cv_naive)],
+             tolerance = 1e-10)
+
+# ridge conformal/placebo (which reuse the frozen lambda instead of re-CVing
+# on every refit) still produce finite inference
+fit_rc_conf <- do.call(feventr::event_study,
+                       c(args[setdiff(names(args), "se")],
+                         list(method = "ridge", se = "conformal")))
+expect_true(all(is.finite(fit_rc_conf$se$ci)))
+
 # match_on = 'cumret': the ridge augmentation must correct the *cumret*
 # imbalance the base weights minimize, not the raw-return imbalance (issue 3).
 # The augmented weights equal the closed form built from the cumret matching

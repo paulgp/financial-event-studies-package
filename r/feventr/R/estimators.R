@@ -107,13 +107,25 @@ eng_ridge_sc <- function(Y, N0, T0, Ymatch = NULL, V = NULL, lambda = NULL,
     w + as.vector(crossprod(X, solve(tcrossprod(X) + diag(l, nrow(X)), resid)))
   }
   if (is.null(lambda)) {
+    # Leave-one-out CV over estimation periods with the SC weights held fixed.
+    # Leaving out period j and augmenting toward the residual r = x1 - X0 w_sc
+    # is kernel ridge regression of r on the Gram K = X0 X0' (rows = periods),
+    # so all LOO errors follow in closed form from one eigendecomposition of K
+    # via e_j / (1 - H_jj), H = K (K + lambda I)^-1 (Ben-Michael et al.'s
+    # augsynth uses the same identity). This replaces an n_lambda x T0 double
+    # loop of dense solves — the cost that otherwise re-ran on every placebo/
+    # conformal refit.
+    r0 <- x1 - as.vector(X0 %*% w_sc)
     smax <- svd(X0, nu = 0, nv = 0)$d[1]
     grid <- exp(seq(log(smax^2), log(smax^2 * 1e-8), length.out = n_lambda))
+    eg <- eigen(tcrossprod(X0), symmetric = TRUE)
+    d <- pmax(eg$values, 0)                       # eigenvalues of K (>= 0)
+    Vr <- as.vector(crossprod(eg$vectors, r0))    # V' r0
+    V2 <- eg$vectors^2                            # for diag(H)
     cv_err <- vapply(grid, function(l) {
-      sum(vapply(seq_len(T0), function(j) {
-        wj <- ridge_w(l, X0[-j, , drop = FALSE], x1[-j], w_sc)
-        (x1[j] - sum(X0[j, ] * wj))^2
-      }, 0))
+      shr <- d / (d + l)                          # H eigenvalue shrinkage
+      e <- r0 - as.vector(eg$vectors %*% (shr * Vr))
+      sum((e / (1 - as.vector(V2 %*% shr)))^2)
     }, 0)
     lambda <- grid[which.min(cv_err)]
   }
