@@ -11,7 +11,7 @@
 #' BSD-3/GPL>=2); ridge augmentation follows augsynth (Ben-Michael, Feller &
 #' Rothstein; comparison benchmarks pinned at commit 982f650b).
 #'
-#' @importFrom stats var cov sd rnorm rbinom plogis qnorm setNames coef vcov confint
+#' @importFrom stats var cov sd rnorm rbinom plogis qnorm pt complete.cases setNames coef vcov confint
 #' @importFrom data.table as.data.table dcast setnames
 #' @keywords internal
 "_PACKAGE"

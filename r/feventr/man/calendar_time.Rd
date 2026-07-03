@@ -46,7 +46,8 @@ used directly), as in \code{\link[=event_study]{event_study()}}.}
 
 \item{weight}{Optional column name in \code{data} holding portfolio weights
 (e.g. lagged market cap) for a value-weighted portfolio; default
-equal-weighted.}
+equal-weighted. Rows with a missing weight are excluded from the
+portfolio (as with missing returns).}
 
 \item{min_units}{Calendar periods whose portfolio holds fewer units are
 dropped from the regression (Fama (1998) uses 10).}

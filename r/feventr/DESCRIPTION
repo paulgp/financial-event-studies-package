@@ -11,6 +11,9 @@ Description: Estimators for causal inference in financial event studies,
     QP polish), ridge-augmented synthetic control, synthetic
     difference-in-differences, and generalized synthetic control, with a common
     panel input and fit object across single-event and many-event batch modes.
+    Also includes a cross-sectional event-study estimator with pre-event
+    benchmarking and PCA-based GLS (Cohn, Johnson, Liu and Wardlaw, "Past is
+    Prologue").
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
