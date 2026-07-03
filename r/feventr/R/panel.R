@@ -98,15 +98,17 @@ fes_panel <- function(data, unit, time, ret, treated, event_time,
 }
 
 # Align a user-supplied factor table (column `time` + numeric factor columns)
-# to the panel's kept columns. Returns a T x K matrix.
-align_factors <- function(factors, time, panel) {
+# to a target vector of time values. Returns a length(time_values) x K matrix.
+# Shared by event_study() (panel columns) and calendar_time() (portfolio
+# periods) so the coverage/format checks stay in one place.
+align_factors <- function(factors, time, time_values) {
   if (is.null(factors)) stop("`factors` is required for this method")
   fdt <- as.data.frame(factors)
   if (!time %in% names(fdt))
     stop("`factors` must contain the panel time column '", time, "'")
-  idx <- match(panel$time_values, fdt[[time]])
+  idx <- match(time_values, fdt[[time]])
   if (anyNA(idx))
-    stop("`factors` does not cover every panel period in the windows")
+    stop("`factors` does not cover every period in the windows")
   F <- as.matrix(fdt[idx, setdiff(names(fdt), time), drop = FALSE])
   if (!is.numeric(F) || !ncol(F)) stop("`factors` must have numeric factor columns")
   F

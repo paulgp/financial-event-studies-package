@@ -105,7 +105,8 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                  window = window, est_window = est_window, donors = donors,
                  align = align)
 
-  F <- if (method %in% c("market", "factor")) align_factors(factors, time, p)
+  F <- if (method %in% c("market", "factor"))
+    align_factors(factors, time, p$time_values)
   force <- match.arg(force)
   # matching matrix for synthetic methods (recomputed per placebo draw)
   mk_match <- if (match_on == "cumret") {

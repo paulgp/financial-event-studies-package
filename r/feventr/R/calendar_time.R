@@ -100,17 +100,7 @@ calendar_time <- function(data, unit, time, ret, events, window = c(0, 10),
   if (!any(ok)) stop("no calendar period holds `min_units` units")
   tvals <- if (align == "value") pos[ok] else times[pos[ok]]
 
-  F <- NULL
-  if (!is.null(factors)) {
-    fdt <- as.data.frame(factors)
-    if (!time %in% names(fdt))
-      stop("`factors` must contain the panel time column '", time, "'")
-    idx <- match(tvals, fdt[[time]])
-    if (anyNA(idx)) stop("`factors` does not cover every portfolio period")
-    F <- as.matrix(fdt[idx, setdiff(names(fdt), time), drop = FALSE])
-    if (!is.numeric(F) || !ncol(F))
-      stop("`factors` must have numeric factor columns")
-  }
+  F <- if (is.null(factors)) NULL else align_factors(factors, time, tvals)
 
   y <- pr[ok]
   X <- cbind(alpha = rep(1, length(y)), F)

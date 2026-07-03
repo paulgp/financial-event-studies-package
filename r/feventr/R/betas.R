@@ -20,7 +20,7 @@ event_betas <- function(object, factors, time = NULL) {
   p <- object$panel
   if (is.null(p)) stop("fit was created with keep_data = FALSE")
   if (is.null(time)) time <- names(factors)[1]
-  F <- align_factors(factors, time, p)
+  F <- align_factors(factors, time, p$time_values)
   pre <- seq_len(p$T0)
   X <- cbind(alpha = 1, F[pre, , drop = FALSE])
   B <- t(qr.solve(X, t(p$Y[, pre, drop = FALSE])))   # units x (1+K)
