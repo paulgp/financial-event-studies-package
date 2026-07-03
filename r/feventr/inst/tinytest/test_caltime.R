@@ -56,6 +56,22 @@ ct_vw <- feventr::calendar_time(long, "id", "t", "ret", events = ev[1, , drop = 
 u1 <- long[long$id == "u01" & long$t %in% (ev$event_time[1] + win[1]:win[2]), ]
 expect_equal(ct_vw$portfolio$ret, u1$ret[order(u1$t)], tolerance = 1e-9)
 
+# NA portfolio weights are dropped, not propagated into an all-NA alpha (#7):
+# blank out one member's weight and confirm the fit is still finite and equals
+# the fit on data with that row removed
+long_na <- long
+hit1 <- long_na$id == "u01" & long_na$t == ev$event_time[1]
+long_na$mcap <- ifelse(long_na$id == "u01", 1, 2)
+long_na$mcap[hit1] <- NA
+ct_na <- feventr::calendar_time(long_na, "id", "t", "ret",
+                                events = ev[1, , drop = FALSE], window = win,
+                                weight = "mcap", returns = "simple")
+expect_true(is.finite(ct_na$alpha) && is.finite(ct_na$alpha_se))
+ct_rm <- feventr::calendar_time(long_na[!hit1, ], "id", "t", "ret",
+                                events = ev[1, , drop = FALSE], window = win,
+                                weight = "mcap", returns = "simple")
+expect_equal(ct_na$alpha, ct_rm$alpha, tolerance = 1e-12)
+
 # min_units drops thin ramp-up/ramp-down periods (peak concurrency is 5:
 # events arrive one per period and each unit is held 5 periods)
 ct_min <- feventr::calendar_time(long, "id", "t", "ret", events = ev,

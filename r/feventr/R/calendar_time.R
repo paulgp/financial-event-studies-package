@@ -30,7 +30,8 @@
 #'   used directly), as in [event_study()].
 #' @param weight Optional column name in `data` holding portfolio weights
 #'   (e.g. lagged market cap) for a value-weighted portfolio; default
-#'   equal-weighted.
+#'   equal-weighted. Rows with a missing weight are excluded from the
+#'   portfolio (as with missing returns).
 #' @param min_units Calendar periods whose portfolio holds fewer units are
 #'   dropped from the regression (Fama (1998) uses 10).
 #' @param se `"ols"` (classical) or `"nw"` (Newey-West with Bartlett kernel).
@@ -64,15 +65,18 @@ calendar_time <- function(data, unit, time, ret, events, window = c(0, 10),
   m_p <- rep(ev_pos, each = length(offs)) + offs
   lo <- min(d_p, m_p)
   P <- max(d_p, m_p) - lo + 2
+  if (!is.null(weight) && !weight %in% names(data))
+    stop("`weight` column not found in `data`")
   keep <- (d_u * P + (d_p - lo)) %in% unique(m_u * P + (m_p - lo)) &
     !is.na(data[[ret]])
+  # A single NA weight would make that calendar period's portfolio return NA
+  # and propagate through qr.solve into every coefficient; drop NA-weight rows
+  # (a unit's first listed period commonly lacks a lagged market cap).
+  if (!is.null(weight)) keep <- keep & !is.na(data[[weight]])
 
   r <- data[[ret]][keep]
   p <- d_p[keep]
-  w <- if (is.null(weight)) rep(1, length(r)) else {
-    if (!weight %in% names(data)) stop("`weight` column not found in `data`")
-    data[[weight]][keep]
-  }
+  w <- if (is.null(weight)) rep(1, length(r)) else data[[weight]][keep]
   if (!length(r)) stop("no panel observations fall in any event window")
 
   n_t <- drop(rowsum(rep(1L, length(p)), p))
