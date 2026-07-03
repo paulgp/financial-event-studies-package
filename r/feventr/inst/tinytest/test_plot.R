@@ -32,6 +32,14 @@ expect_snapshot_plot(function() plot(f_sc, what = "car"), label = "fit_car_sc")
 expect_snapshot_plot(function() plot(f_sc, what = "paths"), label = "fit_paths_sc")
 expect_snapshot_plot(function() plot(f_sc, what = "weights"), label = "fit_weights_sc")
 
+# log-return paths cumulate additively (exp(cumsum) - 1), not as simple
+# returns (issue 12); distinct snapshot from the simple-return paths above
+f_sc_log <- do.call(feventr::event_study,
+                    c(modifyList(args, list(returns = "log")),
+                      list(method = "sc", se = "none")))
+expect_snapshot_plot(function() plot(f_sc_log, what = "paths"),
+                     label = "fit_paths_sc_log")
+
 # batch plot
 ev <- data.frame(unit = as.character(c(1, 2, 5, 6)),
                  event_time = c(60, 60, 70, 70), event = c("a", "a", "b", "b"))

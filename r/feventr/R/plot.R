@@ -44,7 +44,12 @@ plot.fes_fit <- function(x, what = c("att", "car", "paths", "weights"),
     graphics::lines(t, y, type = "b", pch = 19, col = "steelblue")
   } else if (what == "paths") {
     t <- as.numeric(names(x$paths$treated))
-    cum <- function(r) cumprod(1 + r) - 1
+    # cumulate per the fit's own return convention: additively for log returns
+    # (exp(cumsum) - 1), multiplicatively for simple returns — otherwise the
+    # plotted treated/synthetic gap contradicts the fit's CAR/ATT
+    cum <- if (identical(x$conventions$returns, "log"))
+             function(r) exp(cumsum(r)) - 1
+           else function(r) cumprod(1 + r) - 1
     y1 <- cum(x$paths$treated)
     y0 <- cum(x$paths$synthetic)
     plot(t, y1, type = "l", lwd = 2, col = "firebrick",
