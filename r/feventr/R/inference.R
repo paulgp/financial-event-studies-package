@@ -128,18 +128,19 @@ inf_conformal <- function(Y, N0, T0, refit, att, level = 0.95) {
     e[seq_len(T0 + k)]
   }
 
-  p_point <- function(j, h0) {
-    e <- resids(T0 + j, h0)
-    mean(abs(e) >= abs(e[T0 + 1L]) - 1e-12)
-  }
-  p_joint <- function(h0) {
-    e <- abs(resids(seq.int(T0 + 1L, Tn), h0))
+  # test statistics factored out of the residual computation so the residuals
+  # of an already-needed refit can be reused for the bracket scale (below)
+  point_stat <- function(e) mean(abs(e) >= abs(e[T0 + 1L]) - 1e-12)
+  p_point <- function(j, h0) point_stat(resids(T0 + j, h0))
+  joint_stat <- function(e) {
+    e <- abs(e)
     Tt <- length(e)
     block <- seq.int(Tt - T1 + 1L, Tt)
     s <- vapply(seq_len(Tt),
                 function(sh) mean(e[((block - 1L + sh) %% Tt) + 1L]), 0)
     mean(s >= s[Tt] - 1e-12)   # shift Tt is the identity block
   }
+  p_joint <- function(h0) joint_stat(resids(seq.int(T0 + 1L, Tn), h0))
 
   # CI = {h0 : p(h0) > alpha}. Bracket-expansion assumes the center is
   # accepted, but the joint constant-effect null h0 = mean(att) can itself be
@@ -171,14 +172,21 @@ inf_conformal <- function(Y, N0, T0, refit, att, level = 0.95) {
   ci <- matrix(NA_real_, T1, 2L)
   p0 <- numeric(T1)
   for (j in seq_len(T1)) {
-    scale <- max(stats::sd(resids(T0 + j, att[j])[pre]), 1e-10)
-    p0[j] <- p_point(j, 0)
+    # the h0 = 0 refit is needed for p0[j]; reuse its pre-period residuals for
+    # the bracket scale rather than spending a separate refit per post period.
+    # The scale only sets the bracket-expansion step, so its exact h0 does not
+    # affect the CI endpoints (fixed by where the p-value crosses alpha).
+    e0 <- resids(T0 + j, 0)
+    p0[j] <- point_stat(e0)
+    scale <- max(stats::sd(e0[pre]), 1e-10)
     ci[j, ] <- ci_bounds(function(h) p_point(j, h), att[j], scale)
   }
   avg <- mean(att)
-  scale <- max(stats::sd(resids(seq.int(T0 + 1L, Tn), avg)[pre]), 1e-10)
+  e0j <- resids(seq.int(T0 + 1L, Tn), 0)
+  avg_p0 <- joint_stat(e0j)
+  scale <- max(stats::sd(e0j[pre]), 1e-10)
   list(att = NULL, avg = NULL, ci = ci,
        avg_ci = ci_bounds(p_joint, avg, scale),
-       p = p0, avg_p = p_joint(0),
+       p = p0, avg_p = avg_p0,
        level = level, method = "conformal", reps = NULL, draws = NULL)
 }
