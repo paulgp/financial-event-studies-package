@@ -60,6 +60,19 @@ expect_equal(s$n_events[s$group == "x"][1], 2L)
 expect_stdout(print(b), pattern = "3/3 events")
 expect_equal(coef(b), b$att)
 
+# near-edge event: window c(0,5) on an event at t=118 (T=120) can't be covered,
+# so it fails its fit and is dropped — never rbind-recycled into misaligned
+# columns (issues 1 + 2). The surviving events keep the full, aligned horizon.
+ev_edge <- rbind(ev, data.frame(unit = "31", event_time = 118, event = "e4",
+                                bucket = "y"))
+b_edge <- feventr::event_study_batch(long, "id", "t", "ret", events = ev_edge,
+                                     method = "mean", window = c(0, 5),
+                                     est_window = c(-40, -1), returns = "simple",
+                                     se = "cross")
+expect_true(grepl("dropped", b_edge$events$status[b_edge$events$event == "e4"]))
+expect_equal(nrow(b_edge$atts), 3L)             # only the 3 covered events
+expect_equal(colnames(b_edge$atts), as.character(0:5))
+
 # sc engine through batch
 bsc <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
                                   method = "sc", window = c(0, 5),

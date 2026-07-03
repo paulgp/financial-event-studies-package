@@ -58,6 +58,27 @@ expect_error(
   "event_time"
 )
 
+# requested event window must be fully covered: an event near the sample edge
+# errors instead of silently truncating the ATT path (issue 1)
+expect_error(
+  feventr:::fes_panel(d, "id", "t", "ret", "u1", event_time = 28,
+                      window = c(0, 10), est_window = c(-20, -5)),
+  "does not cover event window"
+)
+# a window with no periods at all (panel ends on event day, window starts at 1)
+# would otherwise make `post` descend out of bounds downstream
+expect_error(
+  feventr:::fes_panel(d, "id", "t", "ret", "u1", event_time = 30,
+                      window = c(1, 10), est_window = c(-20, -5)),
+  "does not cover event window"
+)
+# a partial *estimation* window is still allowed (positional alignment on
+# gapped data trims it by design; see the align tests below)
+expect_silent(
+  feventr:::fes_panel(d, "id", "t", "ret", c("u1", "u2"), event_time = 25,
+                      window = c(0, 3), est_window = c(-40, -5))
+)
+
 # donors= restricts the pool
 p4 <- feventr:::fes_panel(d, "id", "t", "ret", treated = "u1",
                           event_time = 25, window = c(0, 3),

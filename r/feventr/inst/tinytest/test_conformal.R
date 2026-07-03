@@ -95,6 +95,28 @@ expect_error(feventr::event_study(long, "id", "t", "ret",
                                   returns = "simple", se = "conformal"),
              pattern = "conformal")
 
+# --- joint CI unavailable when the point-estimate constant is rejected (#5) --
+# a large day-0 effect with ~0 effects afterwards: the joint moving-block test
+# rejects the constant h0 = mean(att), so ci_bounds must return NA rather than
+# bisecting back to a fabricated tight interval around the rejected center.
+Yh <- Y
+Yh[(N0 + 1):(N0 + N1), (T0 + 1):(T0 + T1)] <-
+  Yh[(N0 + 1):(N0 + N1), (T0 + 1):(T0 + T1)] - tau     # undo the constant effect
+Yh[(N0 + 1):(N0 + N1), T0 + 1] <- Yh[(N0 + 1):(N0 + N1), T0 + 1] + 0.3  # spike day 0
+long_h <- data.frame(id = rep(rownames(Yh), times = ncol(Yh)),
+                     t = rep(1:ncol(Yh), each = nrow(Yh)), ret = as.vector(Yh))
+fit_h <- feventr::event_study(long_h, "id", "t", "ret",
+                              treated = paste0("x", 1:N1), event_time = T0 + 1,
+                              method = "sc", window = c(0, T1 - 1),
+                              est_window = c(-T0, -1), returns = "simple",
+                              se = "conformal")
+# the joint test rejects the constant at the point estimate, so ci_bounds
+# returns NA rather than a fabricated interval bracketing the rejected center
+expect_true(all(is.na(fit_h$se$avg_ci)))
+expect_stdout(print(fit_h), pattern = "unavailable")
+# per-period point CIs are unaffected — they still bracket their estimates
+expect_true(all(fit_h$se$ci[, 1] < fit_h$att & fit_h$att < fit_h$se$ci[, 2]))
+
 # --- warm starts ----------------------------------------------------------
 # solver: warm start changes the path, not the solution
 A <- t(Y[1:N0, 1:T0]); b <- colMeans(Y[(N0 + 1):(N0 + N1), 1:T0])

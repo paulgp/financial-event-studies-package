@@ -115,9 +115,13 @@ inf_conformal <- function(Y, N0, T0, refit, att, level = 0.95) {
     mean(s >= s[Tt] - 1e-12)   # shift Tt is the identity block
   }
 
-  # CI = {h0 : p(h0) > alpha}; expand a bracket out from the (always
-  # accepted) point estimate until rejected, then bisect to the boundary
+  # CI = {h0 : p(h0) > alpha}. Bracket-expansion assumes the center is
+  # accepted, but the joint constant-effect null h0 = mean(att) can itself be
+  # rejected when per-period effects are heterogeneous — then the confidence
+  # set is empty and bisection would otherwise fabricate a tight interval
+  # around a rejected value. Test the center first and return NA if rejected.
   ci_bounds <- function(pfun, center, scale) {
+    if (pfun(center) <= alpha + 1e-12) return(c(NA_real_, NA_real_))
     one <- function(dir) {
       acc <- center
       rej <- NULL

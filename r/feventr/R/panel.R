@@ -36,8 +36,19 @@ fes_panel <- function(data, unit, time, ret, treated, event_time,
   } else {
     seq_along(times) - pos0
   }
-  keep <- (offset >= est_window[1] & offset <= est_window[2]) |
-    (offset >= window[1] & offset <= window[2])
+  in_win <- offset >= window[1] & offset <= window[2]
+  keep <- (offset >= est_window[1] & offset <= est_window[2]) | in_win
+  # The requested event window must be fully covered by the panel's periods.
+  # Filtering `keep` alone would silently truncate the ATT path for an event
+  # near a sample edge (conventions$window would still report the full window),
+  # and a window with no periods at all makes `post` descend out of bounds in
+  # event_study(). A partial *estimation* window is allowed (fewer pre-periods
+  # still identifies; positional alignment on gapped data trims it by design).
+  wo <- offset[in_win]
+  if (!length(wo) || min(wo) > window[1] || max(wo) < window[2])
+    stop("panel does not cover event window [", window[1], ", ", window[2],
+         "] for event_time ", event_time, " (available offsets in window: ",
+         if (length(wo)) paste0(min(wo), "..", max(wo)) else "none", ")")
   times_keep <- times[keep]
   dt <- dt[dt[["time"]] %in% times_keep]
   if (anyDuplicated(dt, by = c("unit", "time")))

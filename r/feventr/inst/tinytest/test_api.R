@@ -32,8 +32,21 @@ for (m in c("mean", "did", "market", "factor")) {
   expect_equal(dim(vcov(f)), c(5L, 5L))
   ci <- confint(f)
   expect_true(all(ci[, 1] <= f$att & f$att <= ci[, 2]))
+  # confint uses the exact t df stored by inf_tstat, not qnorm (issue 6):
+  # per-period half-width / se must equal qt(0.975, df), wider than 1.96
+  crit <- (ci[, 2] - ci[, 1]) / 2 / f$se$att
+  expect_equal(unname(crit), rep(stats::qt(0.975, f$se$df), length(crit)),
+               tolerance = 1e-10)
+  expect_true(stats::qt(0.975, f$se$df) > stats::qnorm(0.975))
   expect_stdout(print(f), pattern = m)
 }
+
+# se = "tstat" is guarded to the methods whose ATT it matches (issue 4):
+# for weighted/factor-model counterfactuals it would describe a different
+# estimator than the reported point estimate
+expect_error(
+  do.call(feventr::event_study, c(args, list(method = "sc", se = "tstat"))),
+  pattern = "tstat")
 
 # se = "none" skips inference
 f0 <- do.call(feventr::event_study, c(args, list(method = "mean", se = "none")))

@@ -91,8 +91,18 @@ event_study_batch <- function(data, unit, time, ret, events,
   ok <- vapply(res, function(x) identical(x$status, "ok"), TRUE)
   if (!any(ok)) stop("all events failed; first error: ", res[[1]]$status)
   horizon <- names(res[ok][[1]]$att)
+  # every successful event must expose the same horizon labels: otherwise
+  # do.call(rbind, ...) recycles a short/gapped vector into the wrong columns
+  # (only a warning, easily lost under mclapply) and mixes effects across
+  # different event days. With #1 fixed, a truncated event now fails its fit
+  # and is dropped, but assert here so a mismatch is a hard error, not silent.
+  bad <- Filter(function(x) !identical(names(x$att), horizon), res[ok])
+  if (length(bad))
+    stop("events have mismatched horizons; cannot combine: ",
+         paste(vapply(bad, function(x) as.character(x$event), ""), collapse = ", "))
   atts <- do.call(rbind, lapply(res[ok], `[[`, "att"))
   cars <- do.call(rbind, lapply(res[ok], `[[`, "car"))
+  colnames(atts) <- colnames(cars) <- horizon
   rownames(atts) <- rownames(cars) <- vapply(res[ok], function(x) as.character(x$event), "")
 
   ev_out <- data.frame(event = vapply(res, `[[`, ids[1], "event"),

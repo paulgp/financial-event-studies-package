@@ -136,6 +136,9 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                  nboots = if (is.null(reps)) 1000L else reps))
   eng <- refit(p$Y, p$N0, p$T0)
 
+  if (p$T0 >= ncol(p$Y))
+    stop("no event-window periods remain after the estimation window (T0 = ",
+         p$T0, ", periods = ", ncol(p$Y), ")")
   post <- seq.int(p$T0 + 1L, ncol(p$Y))
   ev_times <- p$times[post]
   att <- eng$tau
@@ -145,7 +148,16 @@ event_study <- function(data, unit, time, ret, treated, event_time,
 
   se_out <- switch(se,
     none = NULL,
-    tstat = inf_tstat(p$Y, p$N0, p$T0, eng, method),
+    tstat = {
+      # inf_tstat's donor-mean two-sample SE matches the reported ATT only for
+      # the unweighted estimators. For sc/ridge/sdid/gsynth the ATT is against
+      # the fitted (weighted / factor) counterfactual, so tstat SEs would
+      # describe a different estimator than the printed point estimate.
+      if (!method %in% c("mean", "did", "market", "factor"))
+        stop("se = 'tstat' is available for methods mean/did/market/factor; ",
+             "use 'placebo' (sc/ridge/sdid) or 'bootstrap' (gsynth)")
+      inf_tstat(p$Y, p$N0, p$T0, eng, method)
+    },
     placebo = inf_placebo(p$Y, p$N0, p$T0, n_treated = length(p$treated),
                           refit = refit,
                           reps = if (is.null(reps)) 100L else reps,
