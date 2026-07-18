@@ -45,7 +45,10 @@ event_study_batch <- function(data, unit, time, ret, events,
   align <- match.arg(align)
   events <- as.data.frame(events)
   stopifnot(all(c("unit", "event_time") %in% names(events)))
-  if (is.null(events$event))
+  # [["event"]], not $event: partial matching would hit `event_time` whenever
+  # the id column is absent, so the id would never be created and the final
+  # merge() on "event" would fail for the documented minimal events table
+  if (is.null(events[["event"]]))
     events$event <- seq_len(nrow(events))
   ids <- unique(events$event)
 

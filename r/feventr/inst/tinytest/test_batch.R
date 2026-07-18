@@ -82,6 +82,17 @@ b_nz <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
 expect_false("0" %in% names(b_nz$att))
 expect_stdout(print(b_nz), pattern = "horizon 1")
 
+# events table without an `event` id column — the documented minimal input
+# (issue 27): $event partial-matched event_time, so ids were never assigned
+# and the final merge() crashed. Each row must become its own event.
+b_min <- feventr::event_study_batch(long, "id", "t", "ret",
+                                    events = ev[, c("unit", "event_time")],
+                                    method = "mean", window = c(0, 5),
+                                    est_window = c(-40, -1), returns = "simple",
+                                    se = "cross")
+expect_equal(nrow(b_min$atts), 5L)
+expect_equal(b_min$events$event, 1:5)
+
 # sc engine through batch
 bsc <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
                                   method = "sc", window = c(0, 5),
