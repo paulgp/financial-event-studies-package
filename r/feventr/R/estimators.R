@@ -206,6 +206,14 @@ eng_sdid <- function(Y, N0, T0, max_iter = 10000L, sparsify = TRUE) {
                    pre_rmse = sqrt(mean((trt[pre] - y0hat[pre])^2))))
 }
 
+# Ahn & Horenstein (2013) eigenvalue-ratio factor count: mu are the
+# descending eigenvalues of the donor cross-product; a near-zero successor
+# is floored so a rank boundary inside 1..kmax is picked, not divided by.
+er_factor_count <- function(mu, kmax) {
+  er <- mu[seq_len(kmax)] / pmax(mu[seq_len(kmax) + 1L], mu[1] * 1e-12)
+  which.max(er)
+}
+
 # Causal factor model (Bai & Wang 2026, arXiv:2606.29691). The event effect
 # is a structural break in the treated unit's exposure to latent common
 # factors, not a gap to an imputed counterfactual path: PCA on the
@@ -250,8 +258,7 @@ eng_cfm <- function(Y, N0, T0, r = NULL, se = FALSE) {
     kmax <- min(if (length(r)) max(r) else 8L, r_cap, N0 - 1L)
     if (kmax < 1L)
       stop("method 'cfm': no admissible factor count for these windows")
-    er <- mu[seq_len(kmax)] / pmax(mu[seq_len(kmax) + 1L], mu[1] * 1e-12)
-    r_use <- which.max(er)
+    r_use <- er_factor_count(mu, kmax)
   }
 
   Fh <- eg$vectors[, seq_len(r_use), drop = FALSE] * sqrt(Tn)  # F'F/T = I

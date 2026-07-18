@@ -11,7 +11,8 @@ event_study(
   ret,
   treated,
   event_time,
-  method = c("mean", "did", "market", "factor", "sc", "ridge", "sdid", "gsynth", "cfm"),
+  method = c("mean", "did", "market", "factor", "sc", "ridge", "sdid", "gsynth", "cfm",
+    "apm"),
   window = c(0, 10),
   est_window = c(-250, -11),
   returns,
@@ -53,7 +54,10 @@ factor columns; CAPM = one column, FF3F = three), \code{"sc"}, \code{"ridge"},
 latent factors from PCA on the donors, the event effect is the break in
 the treated unit's intercept and factor loadings between the estimation
 and event windows; targets the systematic effect, excluding the treated
-unit's idiosyncratic shock).}
+unit's idiosyncratic shock), \code{"apm"} (aggregated projection matrix,
+Lei & Ross: spectral imputation of the treated cohort's counterfactual
+outcome means under a low-rank factor model, fixed-T / large-N; needs
+the GitHub \code{apm} package).}
 
 \item{window}{Event window in trading-period offsets, e.g. \code{c(0, 10)}.}
 
@@ -98,15 +102,18 @@ matrix) for the synthetic-control objective; default identity.}
 \item{lambda}{Ridge penalty for \code{"ridge"}; \code{NULL} = cross-validated.}
 
 \item{r}{Factor-number range for \code{"gsynth"} cross-validation. For
-\code{"cfm"}: a length-1 \code{r} fixes the latent factor count; otherwise the
-count is chosen by the Ahn & Horenstein (2013) eigenvalue-ratio
-criterion over \verb{1..max(r)} (and frozen across placebo refits).}
+\code{"cfm"}/\code{"apm"}: a length-1 \code{r} fixes the latent factor count;
+otherwise the count is chosen by the Ahn & Horenstein (2013)
+eigenvalue-ratio criterion over \verb{1..max(r)} (and frozen across placebo
+refits).}
 
 \item{force}{Fixed effects for \code{"gsynth"}: \code{"unit"} (default), \code{"none"},
 or \code{"two-way"}.}
 
 \item{se}{Inference: \code{"auto"} maps mean/did/market/factor to \code{"tstat"},
-sc/ridge/sdid to \code{"placebo"}, gsynth to \code{"bootstrap"}, cfm to
+sc/ridge/sdid to \code{"placebo"}, gsynth/apm to \code{"bootstrap"} (gsynth:
+parametric bootstrap; apm: the package's multinomial weighted bootstrap
+over units, conditional on the realized treated path), cfm to
 \code{"analytic"} (the Bai & Wang 2026 plug-in SE: heteroskedasticity-robust
 variance of the pre/post loading regressions plus the
 factor-estimation term, cfm only). \code{"conformal"}
@@ -118,7 +125,7 @@ test and CI for a constant effect over the window. Conformal fits store
 CIs and p-values rather than SEs. \code{"none"} skips.}
 
 \item{reps}{Placebo repetitions / bootstrap draws (\code{NULL} = method
-default: 100 placebo, 1000 bootstrap).}
+default: 100 placebo, 1000 bootstrap for gsynth, 200 for apm).}
 
 \item{level}{Confidence level for conformal CIs (fixed at fit time;
 ignored by other \code{se} types, which set the level in \code{\link[=confint]{confint()}}).}

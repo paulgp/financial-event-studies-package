@@ -21,7 +21,10 @@
 #'   latent factors from PCA on the donors, the event effect is the break in
 #'   the treated unit's intercept and factor loadings between the estimation
 #'   and event windows; targets the systematic effect, excluding the treated
-#'   unit's idiosyncratic shock).
+#'   unit's idiosyncratic shock), `"apm"` (aggregated projection matrix,
+#'   Lei & Ross: spectral imputation of the treated cohort's counterfactual
+#'   outcome means under a low-rank factor model, fixed-T / large-N; needs
+#'   the GitHub `apm` package).
 #' @param window Event window in trading-period offsets, e.g. `c(0, 10)`.
 #' @param est_window Pre-event estimation/matching window; must end before
 #'   `window` starts. A gap between the two is allowed and those periods are
@@ -54,13 +57,16 @@
 #'   (Frank-Wolfe + support-restricted QP polish, default), `"fw"`, `"qp"`.
 #' @param lambda Ridge penalty for `"ridge"`; `NULL` = cross-validated.
 #' @param r Factor-number range for `"gsynth"` cross-validation. For
-#'   `"cfm"`: a length-1 `r` fixes the latent factor count; otherwise the
-#'   count is chosen by the Ahn & Horenstein (2013) eigenvalue-ratio
-#'   criterion over `1..max(r)` (and frozen across placebo refits).
+#'   `"cfm"`/`"apm"`: a length-1 `r` fixes the latent factor count;
+#'   otherwise the count is chosen by the Ahn & Horenstein (2013)
+#'   eigenvalue-ratio criterion over `1..max(r)` (and frozen across placebo
+#'   refits).
 #' @param force Fixed effects for `"gsynth"`: `"unit"` (default), `"none"`,
 #'   or `"two-way"`.
 #' @param se Inference: `"auto"` maps mean/did/market/factor to `"tstat"`,
-#'   sc/ridge/sdid to `"placebo"`, gsynth to `"bootstrap"`, cfm to
+#'   sc/ridge/sdid to `"placebo"`, gsynth/apm to `"bootstrap"` (gsynth:
+#'   parametric bootstrap; apm: the package's multinomial weighted bootstrap
+#'   over units, conditional on the realized treated path), cfm to
 #'   `"analytic"` (the Bai & Wang 2026 plug-in SE: heteroskedasticity-robust
 #'   variance of the pre/post loading regressions plus the
 #'   factor-estimation term, cfm only). `"conformal"`
@@ -71,7 +77,7 @@
 #'   test and CI for a constant effect over the window. Conformal fits store
 #'   CIs and p-values rather than SEs. `"none"` skips.
 #' @param reps Placebo repetitions / bootstrap draws (`NULL` = method
-#'   default: 100 placebo, 1000 bootstrap).
+#'   default: 100 placebo, 1000 bootstrap for gsynth, 200 for apm).
 #' @param level Confidence level for conformal CIs (fixed at fit time;
 #'   ignored by other `se` types, which set the level in [confint()]).
 #' @param cores Placebo refits run with `parallel::mclapply(mc.cores =
@@ -85,7 +91,8 @@
 #' @export
 event_study <- function(data, unit, time, ret, treated, event_time,
                         method = c("mean", "did", "market", "factor",
-                                   "sc", "ridge", "sdid", "gsynth", "cfm"),
+                                   "sc", "ridge", "sdid", "gsynth", "cfm",
+                                   "apm"),
                         window = c(0, 10), est_window = c(-250, -11), returns,
                         cumulate = c("auto", "sum", "compound", "log"),
                         align = c("position", "value"),
@@ -108,7 +115,7 @@ event_study <- function(data, unit, time, ret, treated, event_time,
     se <- switch(method,
                  mean = , did = , market = , factor = "tstat",
                  sc = , ridge = , sdid = "placebo",
-                 gsynth = "bootstrap",
+                 gsynth = , apm = "bootstrap",
                  cfm = "analytic")
 
   align <- match.arg(align)
@@ -147,7 +154,10 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                  se = identical(se, "bootstrap"),
                  nboots = if (is.null(reps)) 1000L else reps),
     cfm    = function(Y, N0, T0, w0 = NULL)
-      eng_cfm(Y, N0, T0, r = r, se = identical(se, "analytic")))
+      eng_cfm(Y, N0, T0, r = r, se = identical(se, "analytic")),
+    apm    = function(Y, N0, T0, w0 = NULL)
+      eng_apm(Y, N0, T0, r = r, se = identical(se, "bootstrap"),
+              nboots = if (is.null(reps)) 200L else reps, seed = seed))
   eng <- refit(p$Y, p$N0, p$T0)
 
   # Freeze the CV-selected ridge lambda: the refit closure reads `lambda`
@@ -155,8 +165,8 @@ event_study <- function(data, unit, time, ret, treated, event_time,
   # penalty instead of re-running the full leave-one-out CV each time (and
   # re-tuning the penalty under each null is not what refit-under-null wants).
   if (method == "ridge" && is.null(lambda)) lambda <- eng$info$lambda
-  # Same for cfm's eigenvalue-ratio-selected factor count.
-  if (method == "cfm" && length(r) != 1L) r <- eng$info$r
+  # Same for the cfm/apm eigenvalue-ratio-selected factor count.
+  if (method %in% c("cfm", "apm") && length(r) != 1L) r <- eng$info$r
 
   if (p$T0 >= ncol(p$Y))
     stop("no event-window periods remain after the estimation window (T0 = ",
@@ -177,7 +187,7 @@ event_study <- function(data, unit, time, ret, treated, event_time,
       # describe a different estimator than the printed point estimate.
       if (!method %in% c("mean", "did", "market", "factor"))
         stop("se = 'tstat' is available for methods mean/did/market/factor; ",
-             "use 'placebo' (sc/ridge/sdid), 'bootstrap' (gsynth), or ",
+             "use 'placebo' (sc/ridge/sdid), 'bootstrap' (gsynth/apm), or ",
              "'analytic' (cfm)")
       inf_tstat(p$Y, p$N0, p$T0, eng, method)
     },
@@ -190,15 +200,15 @@ event_study <- function(data, unit, time, ret, treated, event_time,
       # data (the post loading regression); imputing that window under the
       # null changes what the refit estimates, unlike the imputation-style
       # methods conformal inference assumes.
-      if (method %in% c("market", "factor", "gsynth", "cfm"))
+      if (method %in% c("market", "factor", "gsynth", "cfm", "apm"))
         stop("se = 'conformal' is available for methods mean/did/sc/ridge/sdid")
       if (!is.null(V))
         stop("`V` is not supported with conformal inference")
       inf_conformal(p$Y, p$N0, p$T0, refit = refit, att = att, level = level)
     },
     bootstrap = {
-      if (method != "gsynth")
-        stop("se = 'bootstrap' is only available for method 'gsynth'")
+      if (!method %in% c("gsynth", "apm"))
+        stop("se = 'bootstrap' is only available for methods gsynth/apm")
       eng$info$se
     },
     analytic = {
