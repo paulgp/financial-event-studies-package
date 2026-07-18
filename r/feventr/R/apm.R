@@ -36,9 +36,9 @@ eng_apm <- function(Y, N0, T0, r = NULL, se = FALSE, nboots = 200L,
     r_use <- er_factor_count(mu, kmax)
   }
 
-  # apm 0.1.0 calls setorderv/setnames/data.table() unqualified without
-  # importing them, so it only works with data.table on the search path;
-  # attach it for the duration of the call and restore the search path
+  # apm 0.1.0 calls setorderv() unqualified without importing it
+  # (brad-ross/apm#32), so it only works with data.table on the search
+  # path; attach it for the duration of the call and restore it after
   if (!"package:data.table" %in% search()) {
     attachNamespace("data.table")
     on.exit(detach("package:data.table"), add = TRUE)
