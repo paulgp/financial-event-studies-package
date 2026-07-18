@@ -10,7 +10,7 @@ event_study_batch(
   time,
   ret,
   events,
-  method = c("mean", "did", "market", "factor", "sc", "ridge", "sdid", "gsynth"),
+  method = c("mean", "did", "market", "factor", "sc", "ridge", "sdid", "gsynth", "cfm"),
   window = c(0, 10),
   est_window = c(-250, -11),
   returns,

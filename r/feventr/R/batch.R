@@ -30,7 +30,7 @@
 #' @export
 event_study_batch <- function(data, unit, time, ret, events,
                               method = c("mean", "did", "market", "factor",
-                                         "sc", "ridge", "sdid", "gsynth"),
+                                         "sc", "ridge", "sdid", "gsynth", "cfm"),
                               window = c(0, 10), est_window = c(-250, -11),
                               returns, cumulate = c("auto", "sum", "compound", "log"),
                               align = c("position", "value"),

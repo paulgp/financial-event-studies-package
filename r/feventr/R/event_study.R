@@ -17,7 +17,11 @@
 #'   `"market"` (market-adjusted: loading fixed at 1, no intercept, on the
 #'   single factor column), `"factor"` (per-unit OLS loadings on the supplied
 #'   factor columns; CAPM = one column, FF3F = three), `"sc"`, `"ridge"`,
-#'   `"sdid"`, `"gsynth"`.
+#'   `"sdid"`, `"gsynth"`, `"cfm"` (causal factor model, Bai & Wang 2026:
+#'   latent factors from PCA on the donors, the event effect is the break in
+#'   the treated unit's intercept and factor loadings between the estimation
+#'   and event windows; targets the systematic effect, excluding the treated
+#'   unit's idiosyncratic shock).
 #' @param window Event window in trading-period offsets, e.g. `c(0, 10)`.
 #' @param est_window Pre-event estimation/matching window; must end before
 #'   `window` starts. A gap between the two is allowed and those periods are
@@ -49,11 +53,17 @@
 #' @param solver Simplex solver for `"sc"`/`"ridge"`: `"hybrid"`
 #'   (Frank-Wolfe + support-restricted QP polish, default), `"fw"`, `"qp"`.
 #' @param lambda Ridge penalty for `"ridge"`; `NULL` = cross-validated.
-#' @param r Factor-number range for `"gsynth"` cross-validation.
+#' @param r Factor-number range for `"gsynth"` cross-validation. For
+#'   `"cfm"`: a length-1 `r` fixes the latent factor count; otherwise the
+#'   count is chosen by the Ahn & Horenstein (2013) eigenvalue-ratio
+#'   criterion over `1..max(r)` (and frozen across placebo refits).
 #' @param force Fixed effects for `"gsynth"`: `"unit"` (default), `"none"`,
 #'   or `"two-way"`.
 #' @param se Inference: `"auto"` maps mean/did/market/factor to `"tstat"`,
-#'   sc/ridge/sdid to `"placebo"`, gsynth to `"bootstrap"`. `"conformal"`
+#'   sc/ridge/sdid to `"placebo"`, gsynth to `"bootstrap"`, cfm to
+#'   `"analytic"` (the Bai & Wang 2026 plug-in SE: heteroskedasticity-robust
+#'   variance of the pre/post loading regressions plus the
+#'   factor-estimation term, cfm only). `"conformal"`
 #'   (methods mean/did/sc/ridge/sdid, `V = NULL`) is the Chernozhukov,
 #'   Wuthrich & Zhu (2021) refit-under-the-null procedure with exact
 #'   (deterministic, no Monte Carlo) permutation distributions: per-period
@@ -75,7 +85,7 @@
 #' @export
 event_study <- function(data, unit, time, ret, treated, event_time,
                         method = c("mean", "did", "market", "factor",
-                                   "sc", "ridge", "sdid", "gsynth"),
+                                   "sc", "ridge", "sdid", "gsynth", "cfm"),
                         window = c(0, 10), est_window = c(-250, -11), returns,
                         cumulate = c("auto", "sum", "compound", "log"),
                         align = c("position", "value"),
@@ -84,7 +94,7 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                         solver = c("hybrid", "fw", "qp"), lambda = NULL,
                         r = c(0, 5), force = c("unit", "none", "two-way"),
                         se = c("auto", "placebo", "bootstrap", "tstat",
-                               "conformal", "none"),
+                               "conformal", "analytic", "none"),
                         reps = NULL, level = 0.95, cores = 1L,
                         keep_data = TRUE, seed = NULL) {
   method <- match.arg(method)
@@ -98,7 +108,8 @@ event_study <- function(data, unit, time, ret, treated, event_time,
     se <- switch(method,
                  mean = , did = , market = , factor = "tstat",
                  sc = , ridge = , sdid = "placebo",
-                 gsynth = "bootstrap")
+                 gsynth = "bootstrap",
+                 cfm = "analytic")
 
   align <- match.arg(align)
   p <- fes_panel(data, unit, time, ret, treated, event_time,
@@ -134,7 +145,9 @@ event_study <- function(data, unit, time, ret, treated, event_time,
     gsynth = function(Y, N0, T0, w0 = NULL)
       eng_gsynth(Y, N0, T0, r = r, force = force,
                  se = identical(se, "bootstrap"),
-                 nboots = if (is.null(reps)) 1000L else reps))
+                 nboots = if (is.null(reps)) 1000L else reps),
+    cfm    = function(Y, N0, T0, w0 = NULL)
+      eng_cfm(Y, N0, T0, r = r, se = identical(se, "analytic")))
   eng <- refit(p$Y, p$N0, p$T0)
 
   # Freeze the CV-selected ridge lambda: the refit closure reads `lambda`
@@ -142,6 +155,8 @@ event_study <- function(data, unit, time, ret, treated, event_time,
   # penalty instead of re-running the full leave-one-out CV each time (and
   # re-tuning the penalty under each null is not what refit-under-null wants).
   if (method == "ridge" && is.null(lambda)) lambda <- eng$info$lambda
+  # Same for cfm's eigenvalue-ratio-selected factor count.
+  if (method == "cfm" && length(r) != 1L) r <- eng$info$r
 
   if (p$T0 >= ncol(p$Y))
     stop("no event-window periods remain after the estimation window (T0 = ",
@@ -162,7 +177,8 @@ event_study <- function(data, unit, time, ret, treated, event_time,
       # describe a different estimator than the printed point estimate.
       if (!method %in% c("mean", "did", "market", "factor"))
         stop("se = 'tstat' is available for methods mean/did/market/factor; ",
-             "use 'placebo' (sc/ridge/sdid) or 'bootstrap' (gsynth)")
+             "use 'placebo' (sc/ridge/sdid), 'bootstrap' (gsynth), or ",
+             "'analytic' (cfm)")
       inf_tstat(p$Y, p$N0, p$T0, eng, method)
     },
     placebo = inf_placebo(p$Y, p$N0, p$T0, n_treated = length(p$treated),
@@ -170,7 +186,11 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                           reps = if (is.null(reps)) 100L else reps,
                           seed = seed, cores = cores),
     conformal = {
-      if (method %in% c("market", "factor", "gsynth"))
+      # cfm is excluded because its fit uses the treated unit's post-window
+      # data (the post loading regression); imputing that window under the
+      # null changes what the refit estimates, unlike the imputation-style
+      # methods conformal inference assumes.
+      if (method %in% c("market", "factor", "gsynth", "cfm"))
         stop("se = 'conformal' is available for methods mean/did/sc/ridge/sdid")
       if (!is.null(V))
         stop("`V` is not supported with conformal inference")
@@ -179,6 +199,11 @@ event_study <- function(data, unit, time, ret, treated, event_time,
     bootstrap = {
       if (method != "gsynth")
         stop("se = 'bootstrap' is only available for method 'gsynth'")
+      eng$info$se
+    },
+    analytic = {
+      if (method != "cfm")
+        stop("se = 'analytic' is only available for method 'cfm'")
       eng$info$se
     })
   if (!is.null(se_out) && !is.null(se_out$att)) names(se_out$att) <- ev_times

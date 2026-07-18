@@ -11,7 +11,7 @@ event_study(
   ret,
   treated,
   event_time,
-  method = c("mean", "did", "market", "factor", "sc", "ridge", "sdid", "gsynth"),
+  method = c("mean", "did", "market", "factor", "sc", "ridge", "sdid", "gsynth", "cfm"),
   window = c(0, 10),
   est_window = c(-250, -11),
   returns,
@@ -25,7 +25,7 @@ event_study(
   lambda = NULL,
   r = c(0, 5),
   force = c("unit", "none", "two-way"),
-  se = c("auto", "placebo", "bootstrap", "tstat", "conformal", "none"),
+  se = c("auto", "placebo", "bootstrap", "tstat", "conformal", "analytic", "none"),
   reps = NULL,
   level = 0.95,
   cores = 1L,
@@ -49,7 +49,11 @@ already contain the partial-day return as the day-0 observation.}
 \code{"market"} (market-adjusted: loading fixed at 1, no intercept, on the
 single factor column), \code{"factor"} (per-unit OLS loadings on the supplied
 factor columns; CAPM = one column, FF3F = three), \code{"sc"}, \code{"ridge"},
-\code{"sdid"}, \code{"gsynth"}.}
+\code{"sdid"}, \code{"gsynth"}, \code{"cfm"} (causal factor model, Bai & Wang 2026:
+latent factors from PCA on the donors, the event effect is the break in
+the treated unit's intercept and factor loadings between the estimation
+and event windows; targets the systematic effect, excluding the treated
+unit's idiosyncratic shock).}
 
 \item{window}{Event window in trading-period offsets, e.g. \code{c(0, 10)}.}
 
@@ -93,13 +97,19 @@ matrix) for the synthetic-control objective; default identity.}
 
 \item{lambda}{Ridge penalty for \code{"ridge"}; \code{NULL} = cross-validated.}
 
-\item{r}{Factor-number range for \code{"gsynth"} cross-validation.}
+\item{r}{Factor-number range for \code{"gsynth"} cross-validation. For
+\code{"cfm"}: a length-1 \code{r} fixes the latent factor count; otherwise the
+count is chosen by the Ahn & Horenstein (2013) eigenvalue-ratio
+criterion over \verb{1..max(r)} (and frozen across placebo refits).}
 
 \item{force}{Fixed effects for \code{"gsynth"}: \code{"unit"} (default), \code{"none"},
 or \code{"two-way"}.}
 
 \item{se}{Inference: \code{"auto"} maps mean/did/market/factor to \code{"tstat"},
-sc/ridge/sdid to \code{"placebo"}, gsynth to \code{"bootstrap"}. \code{"conformal"}
+sc/ridge/sdid to \code{"placebo"}, gsynth to \code{"bootstrap"}, cfm to
+\code{"analytic"} (the Bai & Wang 2026 plug-in SE: heteroskedasticity-robust
+variance of the pre/post loading regressions plus the
+factor-estimation term, cfm only). \code{"conformal"}
 (methods mean/did/sc/ridge/sdid, \code{V = NULL}) is the Chernozhukov,
 Wuthrich & Zhu (2021) refit-under-the-null procedure with exact
 (deterministic, no Monte Carlo) permutation distributions: per-period

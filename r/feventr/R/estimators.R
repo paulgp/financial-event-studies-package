@@ -206,6 +206,101 @@ eng_sdid <- function(Y, N0, T0, max_iter = 10000L, sparsify = TRUE) {
                    pre_rmse = sqrt(mean((trt[pre] - y0hat[pre])^2))))
 }
 
+# Causal factor model (Bai & Wang 2026, arXiv:2606.29691). The event effect
+# is a structural break in the treated unit's exposure to latent common
+# factors, not a gap to an imputed counterfactual path: PCA on the
+# unit-demeaned donors over the full window recovers the factor space
+# (normalization F'F/T = I), the treated mean is regressed on (1, f_t)
+# separately over the estimation and event columns, and
+#   tau*_t = (a1 - a0) + (lambda1 - lambda0)' f_t
+# is the systematic effect — it strips the treated unit's idiosyncratic
+# shock instead of attributing it to the event (fixed-factors case with a
+# unit intercept, no covariates; single treated unit explicitly allowed).
+# A length-1 `r` fixes the factor count; otherwise the Ahn & Horenstein
+# (2013) eigenvalue-ratio criterion picks it over 1..max(r). With
+# `se = TRUE`, info$se carries the paper's plug-in SEs (Proposition 1 /
+# Lemma 4): HC1 sandwiches of the two loading regressions (the pre and post
+# blocks are asymptotically independent) plus the factor-estimation term
+# dl' Q^-1 S_t Q^-1 dl / N0 built from donor loadings and residuals, with
+# the paper's finite-sample adjustment (N0 - 2r). The SE of the window
+# average replaces the per-period S_t by its analog in the units'
+# time-averaged residuals, which keeps it valid under serial correlation.
+eng_cfm <- function(Y, N0, T0, r = NULL, se = FALSE) {
+  Tn <- ncol(Y)
+  T1 <- Tn - T0
+  pre <- seq_len(T0)
+  post <- seq.int(T0 + 1L, Tn)
+  # both loading regressions need residual df: r + 1 coefficients per block
+  r_cap <- min(T0, T1) - 2L
+  if (r_cap < 1L || N0 < 2L)
+    stop("method 'cfm' needs at least 2 donors and 3 periods in both the ",
+         "estimation and event windows")
+
+  Yc <- Y[seq_len(N0), , drop = FALSE]
+  Xc <- Yc - rowMeans(Yc)               # remove unit means (Bai 2009, S8)
+  eg <- eigen(crossprod(Xc), symmetric = TRUE)
+  mu <- pmax(eg$values, 0)
+
+  if (length(r) == 1L) {
+    r_use <- as.integer(r)
+    if (r_use < 1L || r_use > min(r_cap, N0 - 1L))
+      stop("method 'cfm' needs `r` between 1 and ", min(r_cap, N0 - 1L),
+           " for these windows (got ", r_use, ")")
+  } else {
+    kmax <- min(if (length(r)) max(r) else 8L, r_cap, N0 - 1L)
+    if (kmax < 1L)
+      stop("method 'cfm': no admissible factor count for these windows")
+    er <- mu[seq_len(kmax)] / pmax(mu[seq_len(kmax) + 1L], mu[1] * 1e-12)
+    r_use <- which.max(er)
+  }
+
+  Fh <- eg$vectors[, seq_len(r_use), drop = FALSE] * sqrt(Tn)  # F'F/T = I
+  Z <- cbind(1, Fh)
+  trt <- colMeans(Y[-seq_len(N0), , drop = FALSE])
+  Zpre <- Z[pre, , drop = FALSE]
+  Zpost <- Z[post, , drop = FALSE]
+  th0 <- qr.solve(Zpre, trt[pre])
+  th1 <- qr.solve(Zpost, trt[post])
+  e0 <- trt[pre] - as.vector(Zpre %*% th0)
+  e1 <- trt[post] - as.vector(Zpost %*% th1)
+  tau <- as.vector(Zpost %*% (th1 - th0))
+  # the implied counterfactual keeps the realized idiosyncratic shock
+  # (Y(0) = lambda0'f + eps under error invariance), so the contract
+  # identity tau = treated - y0hat holds and CARs cumulate tau* exactly
+  y0hat <- numeric(Tn)
+  y0hat[pre] <- as.vector(Zpre %*% th0)
+  y0hat[post] <- trt[post] - tau
+
+  out_se <- NULL
+  if (se) {
+    k <- r_use + 1L
+    hc1 <- function(Zd, ed) {
+      Zi <- chol2inv(chol(crossprod(Zd)))
+      Zi %*% crossprod(Zd * ed) %*% Zi * (nrow(Zd) / (nrow(Zd) - k))
+    }
+    C <- hc1(Zpre, e0) + hc1(Zpost, e1)
+    v_reg <- rowSums((Zpost %*% C) * Zpost)
+    Lam <- Xc %*% Fh / Tn                 # donor loadings, N0 x r
+    Ec <- Xc - tcrossprod(Lam, Fh)        # donor residuals
+    dl <- (th1 - th0)[-1L]
+    G <- as.vector(Lam %*% solve(crossprod(Lam) / N0, dl))
+    nf <- N0 * max(N0 - 2L * r_use, 1L)
+    v_f <- colSums((G * Ec[, post, drop = FALSE])^2) / nf
+    zbar <- colMeans(Zpost)
+    ebar <- rowMeans(Ec[, post, drop = FALSE])
+    out_se <- list(att = sqrt(v_reg + v_f),
+                   avg = sqrt(sum(zbar * as.vector(C %*% zbar)) +
+                                sum((G * ebar)^2) / nf),
+                   method = "analytic", df = NULL, reps = NULL, draws = NULL)
+  }
+
+  coefs <- rbind(pre = th0, post = th1)
+  colnames(coefs) <- c("alpha", paste0("f", seq_len(r_use)))
+  list(y0hat = y0hat, tau = tau,
+       weights = list(omega = NULL, lambda = NULL, beta = coefs),
+       info = list(r = r_use, pre_rmse = sqrt(mean(e0^2)), se = out_se))
+}
+
 # Cumulative effects over the event window from per-period mean return paths.
 #   sum:      arithmetic sum of effects (cumsum of treated - synthetic)
 #   compound: prod(1 + r_treated) - prod(1 + r_synthetic), cumulative
