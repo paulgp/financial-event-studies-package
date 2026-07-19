@@ -18,6 +18,8 @@ time, cumulative effects, standard errors, diagnostics, and plot methods.
 | `ridge` | Ridge-augmented SC (augsynth-style closed form, LOO λ CV) | placebo |
 | `sdid` | Synthetic difference-in-differences (synthdid algorithm port) | placebo |
 | `gsynth` | Generalized synthetic control (wraps CRAN `gsynth`) | parametric bootstrap (1,000) |
+| `cfm` | Causal factor model: the event effect is a break in the treated unit's latent-factor loadings, excluding its idiosyncratic shock (Bai & Wang, arXiv:2606.29691) | analytic plug-in |
+| `apm` | Aggregated projection matrix: spectral counterfactual outcome means under general missingness (Lei & Ross, arXiv:2312.07520; GitHub [`apm`](https://github.com/brad-ross/apm)) | weighted bootstrap (200) |
 
 Beyond `se = "auto"`: `se = "conformal"` (methods mean/did/sc/ridge/sdid) runs
 Chernozhukov–Wüthrich–Zhu refit-under-the-null inference with *exact*
@@ -30,7 +32,9 @@ pre-drawn, so results are identical for any core count).
 
 Two first-class modes: `event_study()` (one event, many treated units) and
 `event_study_batch()` (hundreds–thousands of events, each with its own event
-date and donor pool; fit per event in parallel, cross-event SEs). A third,
+date and donor pool; fit per event in parallel with per-event checkpointing,
+cross-event SEs with optional event weights and per-event SE propagation —
+see `?event_study_batch`). A third,
 complementary design via `calendar_time()`: the Jaffe–Mandelker calendar-time
 portfolio estimator (Fama 1998) — each calendar period's portfolio holds every
 unit within the event window, portfolio returns are regressed on factors, and
@@ -79,6 +83,35 @@ data — the Geithner all-CRSP window, 4,080 donors × 225 days — the hybrid i
 123–131× faster than the full QP at +4.4e-9 relative objective, insensitive
 to the support-size cutoff; `benchmarks/support_sensitivity_real.R`.)
 
+## Method timings
+
+Seconds **per event** through `event_study_batch()` on simulated staggered
+panels (500 donors, one treated unit per cohort, window `c(0, 10)`, single
+core, per-event `se = "none"`), by number of events and estimation-window
+length t₀:
+
+| `method =` | 10 events, t₀=100 | 50 events, t₀=100 | 10 events, t₀=250 | 50 events, t₀=250 |
+|---|---:|---:|---:|---:|
+| `mean` | 0.02s | 0.02s | 0.03s | 0.03s |
+| `did` | 0.02s | 0.02s | 0.03s | 0.04s |
+| `market` | 0.01s | 0.02s | 0.03s | 0.03s |
+| `factor` | 0.01s | 0.02s | 0.03s | 0.04s |
+| `sc` | 0.04s | 0.04s | 0.08s | 0.09s |
+| `ridge` | 0.05s | 0.05s | 0.15s | 0.15s |
+| `sdid` | 1.31s | 1.42s | 3.54s | 3.54s |
+| `gsynth` | 0.11s | 0.12s | 0.48s | 0.50s |
+| `cfm` | 0.02s | 0.02s | 0.07s | 0.07s |
+| `apm` | 0.09s | 0.09s | 0.25s | 0.27s |
+
+(`benchmarks/method_benchmark.R`.) Per-event cost is flat in the number of
+cohorts — the panel layer trims each event to its own windows before copying
+anything — and scales with the estimation-window length. Batch runs
+parallelize linearly with `cores =` (gsynth is derated to `cores %/% 3`
+workers by default; see `?event_study_batch` for checkpointing and per-event
+SEs). Costs grow with the donor pool: on the S&P 500 index-inclusion
+application (~4,000–6,000 donors, 301-day windows, 635 cohorts) gsynth runs
+at ~1.8s/event and cfm/apm at ~1.3s/3.0s core-seconds per event end-to-end.
+
 ## Replicating the paper
 
 `replication/` reproduces Tables 1–7 against the paper's data repository
@@ -94,6 +127,9 @@ verdicts and documented deviations.
 # from this repository
 install.packages(c("data.table", "osqp", "gsynth"))
 devtools::install_local("r/feventr")
+
+# optional: method = "apm" (GitHub-only engine)
+remotes::install_github("brad-ross/apm", subdir = "r")
 ```
 
 ## License and provenance
