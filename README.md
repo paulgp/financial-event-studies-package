@@ -85,32 +85,41 @@ to the support-size cutoff; `benchmarks/support_sensitivity_real.R`.)
 
 ## Method timings
 
-Seconds **per event** through `event_study_batch()` on simulated staggered
-panels (500 donors, one treated unit per cohort, window `c(0, 10)`, single
-core, per-event `se = "none"`), by number of events and estimation-window
-length t₀:
+Seconds **per event** on simulated staggered panels (500 donors, one treated
+unit per cohort, window `c(0, 10)`, single core), by estimation-window length
+t₀. The first two columns are point estimates only — `event_study_batch()`
+with its default per-event `se = "none"`, the batch design. The last column
+is a single-event `event_study()` fit at the `se = "auto"` defaults (t-stat
+for mean/did/market/factor, placebo with 100 reps for sc/ridge/sdid,
+parametric bootstrap with 1,000 draws for gsynth, analytic for cfm, weighted
+bootstrap with 200 draws for apm):
 
-| `method =` | 10 events, t₀=100 | 50 events, t₀=100 | 10 events, t₀=250 | 50 events, t₀=250 |
-|---|---:|---:|---:|---:|
-| `mean` | 0.02s | 0.02s | 0.03s | 0.03s |
-| `did` | 0.02s | 0.02s | 0.03s | 0.04s |
-| `market` | 0.01s | 0.02s | 0.03s | 0.03s |
-| `factor` | 0.01s | 0.02s | 0.03s | 0.04s |
-| `sc` | 0.04s | 0.04s | 0.08s | 0.09s |
-| `ridge` | 0.05s | 0.05s | 0.15s | 0.15s |
-| `sdid` | 1.31s | 1.42s | 3.54s | 3.54s |
-| `gsynth` | 0.11s | 0.12s | 0.48s | 0.50s |
-| `cfm` | 0.02s | 0.02s | 0.07s | 0.07s |
-| `apm` | 0.09s | 0.09s | 0.25s | 0.27s |
+| `method =` | estimation only, t₀=100 | estimation only, t₀=250 | with `se = "auto"`, t₀=250 |
+|---|---:|---:|---:|
+| `mean` | 0.02s | 0.03s | 0.02s |
+| `did` | 0.02s | 0.04s | 0.03s |
+| `market` | 0.02s | 0.03s | 0.03s |
+| `factor` | 0.02s | 0.04s | 0.02s |
+| `sc` | 0.04s | 0.09s | 5.5s |
+| `ridge` | 0.05s | 0.15s | 6.5s |
+| `sdid` | 1.43s | 3.62s | 330s |
+| `gsynth` | 0.12s | 0.50s | 109s |
+| `cfm` | 0.03s | 0.07s | 0.07s |
+| `apm` | 0.09s | 0.27s | 25s |
 
-(`benchmarks/method_benchmark.R`.) Per-event cost is flat in the number of
-cohorts — the panel layer trims each event to its own windows before copying
-anything — and scales with the estimation-window length. Batch runs
-parallelize linearly with `cores =` (gsynth is derated to `cores %/% 3`
-workers by default; see `?event_study_batch` for checkpointing and per-event
-SEs). Costs grow with the donor pool: on the S&P 500 index-inclusion
-application (~4,000–6,000 donors, 301-day windows, 635 cohorts) gsynth runs
-at ~1.8s/event and cfm/apm at ~1.3s/3.0s core-seconds per event end-to-end.
+(`benchmarks/method_benchmark.R`; the results CSV also carries a 10-event
+grid showing per-event cost is flat in the number of cohorts — the panel
+layer trims each event to its own windows before copying anything.)
+Inference is free where it is closed-form (t-stat, cfm's analytic SEs) and
+costs roughly reps × the refit time where it is resampled; placebo refits
+parallelize with `cores =`, and conformal inference (sc-family) is a cheaper
+deterministic alternative (~4s at 2,000 donors, above). Batch runs
+parallelize linearly with `cores =` (gsynth derated to `cores %/% 3` workers
+by default; see `?event_study_batch` for checkpointing, event weights, and
+per-event SE propagation). Costs grow with the donor pool: on the S&P 500
+index-inclusion application (~4,000–6,000 donors, 301-day windows, 635
+cohorts) gsynth runs at ~1.8s/event and cfm/apm at ~1.3s/3.0s core-seconds
+per event end-to-end.
 
 ## Replicating the paper
 
