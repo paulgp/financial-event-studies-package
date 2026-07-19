@@ -25,9 +25,11 @@ fes_panel <- function(data, unit, time, ret, treated, event_time,
   if (est_window[2] >= window[1])
     stop("`est_window` must end before the event `window` starts")
 
-  dt <- data.table::as.data.table(data)[, c(unit, time, ret), with = FALSE]
-  data.table::setnames(dt, c("unit", "time", "ret"))
-  times <- sort(unique(dt[["time"]]))
+  miss <- setdiff(c(unit, time, ret), names(data))
+  if (length(miss))
+    stop("column(s) not found in `data`: ", paste(miss, collapse = ", "))
+  tvals <- data[[time]]
+  times <- sort(unique(tvals))
   pos0 <- match(event_time, times)
   if (is.na(pos0)) stop("`event_time` not found among panel times")
   offset <- if (align == "value") {
@@ -50,14 +52,30 @@ fes_panel <- function(data, unit, time, ret, treated, event_time,
          "] for event_time ", event_time, " (available offsets in window: ",
          if (length(wo)) paste0(min(wo), "..", max(wo)) else "none", ")")
   times_keep <- times[keep]
-  dt <- dt[dt[["time"]] %in% times_keep]
-  if (anyDuplicated(dt, by = c("unit", "time")))
+  # Trim to the loaded windows BEFORE materializing anything: copying the
+  # whole input first meant every batch worker briefly held a full-panel
+  # duplicate (48 years x 66.7M rows in the index-inclusion application),
+  # which is what OOM-killed parallel runs. Only the kept rows of the three
+  # needed columns are ever copied, and the time key becomes a small integer
+  # period index so grouping/pivoting never runs on Date comparison paths.
+  # match() on classed vectors (Date, POSIXct) routes through mtfrm(), i.e.
+  # a full format() of every row — the ~50s-per-call cost on the 66.7M-row
+  # panel. Matching the unclassed keys is the same join on the raw numbers.
+  ti <- if (is.object(tvals)) match(unclass(tvals), unclass(times))
+        else match(tvals, times)
+  rows <- which(keep[ti])
+  dt <- data.table::data.table(unit = data[[unit]][rows], ti = ti[rows],
+                               ret = data[[ret]][rows])
+  if (anyDuplicated(dt, by = c("unit", "ti")))
     stop("duplicate unit-time rows in `data`")
 
-  W <- data.table::dcast(dt, unit ~ time, value.var = "ret")
+  W <- data.table::dcast(dt, unit ~ ti, value.var = "ret")
   units <- as.character(W[["unit"]])
   Y <- as.matrix(W[, -1L, with = FALSE])
-  Y <- Y[, match(as.character(times_keep), colnames(Y)), drop = FALSE]
+  Y <- Y[, match(as.character(which(keep)), colnames(Y)), drop = FALSE]
+  # engines and fit objects keep seeing the caller's time values in the
+  # column names (sdid's lambda weights are named from them)
+  colnames(Y) <- as.character(times_keep)
   rownames(Y) <- units
 
   treated <- as.character(treated)

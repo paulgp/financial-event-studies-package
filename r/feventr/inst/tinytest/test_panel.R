@@ -115,3 +115,42 @@ pp <- feventr:::fes_panel(d5, "id", "t", "ret", treated = "u1",
                           event_time = 0, window = c(0, 3),
                           est_window = c(-20, -5), align = "position")
 expect_equal(pp$T0, 12L)
+
+# Date time keys (issues 21 + 25): the trimmed integer-index path must
+# reproduce the numeric-key panel exactly, keep Date time_values, and keep
+# the caller's time values as Y's column names
+dts <- as.Date("2020-01-01") + 0:79
+set.seed(4)
+longd <- data.frame(id = rep(paste0("u", 1:12), each = 80),
+                    d = rep(dts, times = 12), ret = rnorm(960, 0, 0.01))
+pd <- feventr:::fes_panel(longd, "id", "d", "ret", treated = "u12",
+                          event_time = dts[61], window = c(0, 5),
+                          est_window = c(-40, -11))
+longi <- transform(longd, d = as.integer(d))
+pin <- feventr:::fes_panel(longi, "id", "d", "ret", treated = "u12",
+                           event_time = as.integer(dts[61]), window = c(0, 5),
+                           est_window = c(-40, -11))
+expect_equivalent(pd$Y, pin$Y)
+expect_equal(pd$N0, pin$N0)
+expect_equal(pd$T0, pin$T0)
+expect_equal(pd$times, pin$times)
+expect_inherits(pd$time_values, "Date")
+expect_equal(colnames(pd$Y), as.character(pd$time_values))
+
+# duplicate unit-time rows inside the loaded windows are still a hard error
+# after the trim-first change; duplicates outside them never were
+dup_in <- rbind(longd, longd[longd$id == "u3" & longd$d == dts[62], ])
+expect_error(feventr:::fes_panel(dup_in, "id", "d", "ret", treated = "u12",
+                                 event_time = dts[61], window = c(0, 5),
+                                 est_window = c(-40, -11)),
+             pattern = "duplicate")
+dup_out <- rbind(longd, longd[longd$id == "u3" & longd$d == dts[15], ])
+expect_silent(feventr:::fes_panel(dup_out, "id", "d", "ret", treated = "u12",
+                                  event_time = dts[61], window = c(0, 5),
+                                  est_window = c(-40, -11)))
+
+# missing columns get a direct error
+expect_error(feventr:::fes_panel(longd, "id", "nope", "ret", treated = "u12",
+                                 event_time = dts[61], window = c(0, 5),
+                                 est_window = c(-40, -11)),
+             pattern = "not found")
