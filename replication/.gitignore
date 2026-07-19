@@ -1,3 +1,5 @@
 sim_out/
 gsynth_out/
+cfm_out/
+apm_out/
 *.log
