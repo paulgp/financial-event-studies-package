@@ -107,3 +107,62 @@ expect_silent(plot(b))
 expect_silent(plot(bsc, what = "car"))
 grDevices::dev.off()
 unlink(tf)
+
+# per-event weights (issue 26): pooled paths and cross SE use the weighted
+# formulas, which nest the equal-weight case
+b_w <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
+                                  method = "mean", window = c(0, 5),
+                                  est_window = c(-40, -1), returns = "simple",
+                                  se = "cross", weights = "n_treated")
+wt <- b_w$weights[rownames(b_w$atts)]
+expect_equal(unname(wt), c(2, 2, 1))
+wn <- wt / sum(wt)
+expect_equal(unname(b_w$att), as.vector(wn %*% b_w$atts))
+ctr <- sweep(b_w$atts, 2, as.vector(wn %*% b_w$atts))
+expect_equal(unname(b_w$se$att),
+             unname(sqrt(colSums(ctr^2 * wn^2) * 3 / 2)), tolerance = 1e-12)
+s_w <- summary(b_w, horizon = 0)
+expect_equal(s_w$estimate, unname(b_w$att[["0"]]))
+
+# per-event inference propagates (issue 26): ses matrix, att_avg_se column,
+# within/total SE components (total = pmax at equal weights)
+b_se <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
+                                   method = "mean", window = c(0, 5),
+                                   est_window = c(-40, -1), returns = "simple",
+                                   event_se = "auto")
+expect_equal(dim(b_se$ses), dim(b_se$atts))
+expect_true(all(is.finite(b_se$events$att_avg_se[b_se$events$status == "ok"])))
+f1se <- feventr::event_study(long, "id", "t", "ret",
+                             treated = c("1", "2"), event_time = 60,
+                             donors = setdiff(as.character(1:n), c("1", "2")),
+                             method = "mean", window = c(0, 5),
+                             est_window = c(-40, -1), returns = "simple",
+                             se = "tstat")
+expect_equal(unname(b_se$ses["e1", ]), unname(f1se$se$att), tolerance = 1e-12)
+expect_equal(unname(b_se$se$within_att),
+             unname(sqrt(colSums(b_se$ses^2) / 9)), tolerance = 1e-12)
+expect_equal(unname(b_se$se$total_att),
+             unname(pmax(b_se$se$att, b_se$se$within_att)), tolerance = 1e-12)
+# point estimates and cross SEs unchanged by turning per-event inference on
+expect_equal(b_se$att, b$att, tolerance = 1e-12)
+expect_equal(b_se$se$att, b$se$att, tolerance = 1e-12)
+
+# checkpointing (issue 24): completed events are reloaded, not refit — a
+# sentinel planted in one checkpoint must surface in the rerun's results
+ckdir <- file.path(tempdir(), "fes_batch_ck")
+unlink(ckdir, recursive = TRUE)
+b_ck <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
+                                   method = "mean", window = c(0, 5),
+                                   est_window = c(-40, -1), returns = "simple",
+                                   checkpoint_dir = ckdir)
+expect_equal(b_ck$att, b$att, tolerance = 1e-12)
+expect_true(all(file.exists(file.path(ckdir, sprintf("event_%d.rds", 1:3)))))
+x <- readRDS(file.path(ckdir, "event_2.rds"))
+x$att[] <- 99
+saveRDS(x, file.path(ckdir, "event_2.rds"))
+b_ck2 <- feventr::event_study_batch(long, "id", "t", "ret", events = ev,
+                                    method = "mean", window = c(0, 5),
+                                    est_window = c(-40, -1), returns = "simple",
+                                    checkpoint_dir = ckdir)
+expect_true(all(b_ck2$atts["e2", ] == 99))
+unlink(ckdir, recursive = TRUE)

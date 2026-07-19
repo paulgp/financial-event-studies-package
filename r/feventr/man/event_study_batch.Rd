@@ -26,7 +26,12 @@ event_study_batch(
   r = c(0, 5),
   force = c("unit", "none", "two-way"),
   se = c("cross", "none"),
+  event_se = "none",
+  event_reps = NULL,
+  weights = NULL,
   cores = 1L,
+  gsynth_cores = NULL,
+  checkpoint_dir = NULL,
   keep_fits = FALSE
 )
 }
@@ -45,17 +50,52 @@ own event between \code{est_window[1]} and \code{window[2]} of this event (in
 trading-period offsets), so contemporaneously-treated units never serve
 as donors.}
 
-\item{se}{\code{"cross"} (default): cross-event mean and \code{sd/sqrt(n)} per
-horizon; \code{"none"}.}
+\item{se}{\code{"cross"} (default): cross-event mean and SE per horizon
+(\code{sd/sqrt(n)}, or its weighted analog under \code{weights}); \code{"none"}. With
+\code{event_se} active, \verb{$se} also carries \code{within_att} (the pooled
+within-event SE component, \verb{sqrt(sum(wn^2 se_i^2))}) and \code{total_att}
+(\code{pmax(att, within_att)}). The cross SE already embeds each event's
+estimation noise when events are independent — the two components are
+deliberately not added — but the cross dispersion is itself estimated,
+so \code{total_att} floors it by the known within component
+(DerSimonian-Laird method-of-moments logic), which binds when few
+events are pooled.}
 
-\item{cores}{Events are fit with \code{parallel::mclapply(mc.cores = cores)}.}
+\item{event_se}{Per-event inference passed to \code{\link[=event_study]{event_study()}}'s \code{se}
+(default \code{"none"}, the fast path). When active, each event's SE path
+lands in \verb{$ses}, its \code{att_avg_se} in \verb{$events}, and the pooled
+\code{within_att}/\code{total_att} fields are filled. \code{"conformal"} is not
+supported here (it stores CIs, not SEs).}
+
+\item{event_reps}{Per-event \code{reps} passed to \code{\link[=event_study]{event_study()}} when
+\code{event_se} needs draws (placebo/bootstrap).}
+
+\item{weights}{Per-event weights for the pooled paths and SEs:
+\code{NULL} (equal, the default), \code{"n_treated"} (each event's realized
+treated count), or the name of a numeric column of \code{events}. Applied
+consistently to \verb{$att}/\verb{$car}, the cross/within SEs, and \code{\link[=summary]{summary()}}.}
+
+\item{cores}{Events are fit with \code{parallel::mclapply(mc.cores = cores)},
+in blocks, with each worker pinned to one data.table thread (a full
+thread pool per fork oversubscribes the CPU and thrashes memory).}
+
+\item{gsynth_cores}{Worker cap when \code{method = "gsynth"}, whose fits carry
+several times the memory of the other engines; default
+\code{max(1, cores \%/\% 3)}. Set to \code{cores} to disable the derate.}
+
+\item{checkpoint_dir}{Optional directory for per-event checkpoints
+(\verb{event_<i>.rds}). Completed events are reloaded instead of refit on a
+rerun, so a crash (or an OOM-killed worker) costs one block of work
+instead of the whole run.}
 
 \item{keep_fits}{Store the full per-event \code{fes_fit} list (memory-heavy).}
 }
 \value{
-An object of class \code{fes_batch}: \verb{$att}/\verb{$car} (cross-event mean
-paths), \verb{$se}, \verb{$atts}/\verb{$cars} (event x horizon matrices), \verb{$events}
-(input table + n_treated, n_donors, pre_rmse, status), \verb{$fits} if kept.
+An object of class \code{fes_batch}: \verb{$att}/\verb{$car} (pooled paths),
+\verb{$se}, \verb{$atts}/\verb{$cars} (event x horizon matrices), \verb{$ses} (per-event SE
+paths when \code{event_se} is active), \verb{$events} (input table + n_treated,
+n_donors, pre_rmse, att_avg_se, status), \verb{$weights} (per-event weights
+when set), \verb{$fits} if kept.
 }
 \description{
 Fits \code{\link[=event_study]{event_study()}} once per event (each with its own event date, treated
