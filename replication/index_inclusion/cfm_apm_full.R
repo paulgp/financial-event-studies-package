@@ -1,3 +1,8 @@
+# NOTE: cfm was subsequently disabled as a public method (issue 31; its
+# systematic-effect estimand smears short-lived effects — this script is the
+# evidence). Cached outputs remain valid; to refit cfm, re-enable it in
+# event_study()/event_study_batch() as described in R/event_study.R.
+#
 # cfm and apm over all 635 index-inclusion cohorts, mirroring the Gsynth
 # full run's conventions (window=c(-100,20), est_window=c(-280,-101),
 # returns="simple", se="none"; factor count by Ahn-Horenstein over 1..5) and

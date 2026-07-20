@@ -18,7 +18,6 @@ time, cumulative effects, standard errors, diagnostics, and plot methods.
 | `ridge` | Ridge-augmented SC (augsynth-style closed form, LOO λ CV) | placebo |
 | `sdid` | Synthetic difference-in-differences (synthdid algorithm port) | placebo |
 | `gsynth` | Generalized synthetic control (wraps CRAN `gsynth`) | parametric bootstrap (1,000) |
-| `cfm` | Causal factor model: the event effect is a break in the treated unit's latent-factor loadings, excluding its idiosyncratic shock (Bai & Wang, arXiv:2606.29691) | analytic plug-in |
 | `apm` | Aggregated projection matrix: spectral counterfactual outcome means under general missingness (Lei & Ross, arXiv:2312.07520; GitHub [`apm`](https://github.com/brad-ross/apm)) | weighted bootstrap (200) |
 
 Beyond `se = "auto"`: `se = "conformal"` (methods mean/did/sc/ridge/sdid) runs
@@ -91,8 +90,8 @@ t₀. The first two columns are point estimates only — `event_study_batch()`
 with its default per-event `se = "none"`, the batch design. The last column
 is a single-event `event_study()` fit at the `se = "auto"` defaults (t-stat
 for mean/did/market/factor, placebo with 100 reps for sc/ridge/sdid,
-parametric bootstrap with 1,000 draws for gsynth, analytic for cfm, weighted
-bootstrap with 200 draws for apm):
+parametric bootstrap with 1,000 draws for gsynth, weighted bootstrap with
+200 draws for apm):
 
 | `method =` | estimation only, t₀=100 | estimation only, t₀=250 | with `se = "auto"`, t₀=250 |
 |---|---:|---:|---:|
@@ -104,22 +103,21 @@ bootstrap with 200 draws for apm):
 | `ridge` | 0.05s | 0.15s | 6.5s |
 | `sdid` | 1.43s | 3.62s | 330s |
 | `gsynth` | 0.12s | 0.50s | 109s |
-| `cfm` | 0.03s | 0.07s | 0.07s |
 | `apm` | 0.09s | 0.27s | 25s |
 
 (`benchmarks/method_benchmark.R`; the results CSV also carries a 10-event
 grid showing per-event cost is flat in the number of cohorts — the panel
 layer trims each event to its own windows before copying anything.)
-Inference is free where it is closed-form (t-stat, cfm's analytic SEs) and
-costs roughly reps × the refit time where it is resampled; placebo refits
+Inference is free where it is closed-form (the t-stat methods) and costs
+roughly reps × the refit time where it is resampled; placebo refits
 parallelize with `cores =`, and conformal inference (sc-family) is a cheaper
 deterministic alternative (~4s at 2,000 donors, above). Batch runs
 parallelize linearly with `cores =` (gsynth derated to `cores %/% 3` workers
 by default; see `?event_study_batch` for checkpointing, event weights, and
 per-event SE propagation). Costs grow with the donor pool: on the S&P 500
 index-inclusion application (~4,000–6,000 donors, 301-day windows, 635
-cohorts) gsynth runs at ~1.8s/event and cfm/apm at ~1.3s/3.0s core-seconds
-per event end-to-end.
+cohorts) gsynth runs at ~1.8s/event and apm at ~3.0 core-seconds per event
+end-to-end.
 
 ## Replicating the paper
 

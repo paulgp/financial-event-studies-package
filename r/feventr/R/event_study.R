@@ -17,11 +17,7 @@
 #'   `"market"` (market-adjusted: loading fixed at 1, no intercept, on the
 #'   single factor column), `"factor"` (per-unit OLS loadings on the supplied
 #'   factor columns; CAPM = one column, FF3F = three), `"sc"`, `"ridge"`,
-#'   `"sdid"`, `"gsynth"`, `"cfm"` (causal factor model, Bai & Wang 2026:
-#'   latent factors from PCA on the donors, the event effect is the break in
-#'   the treated unit's intercept and factor loadings between the estimation
-#'   and event windows; targets the systematic effect, excluding the treated
-#'   unit's idiosyncratic shock), `"apm"` (aggregated projection matrix,
+#'   `"sdid"`, `"gsynth"`, `"apm"` (aggregated projection matrix,
 #'   Lei & Ross: spectral imputation of the treated cohort's counterfactual
 #'   outcome means under a low-rank factor model, fixed-T / large-N; needs
 #'   the GitHub `apm` package).
@@ -57,19 +53,15 @@
 #'   (Frank-Wolfe + support-restricted QP polish, default), `"fw"`, `"qp"`.
 #' @param lambda Ridge penalty for `"ridge"`; `NULL` = cross-validated.
 #' @param r Factor-number range for `"gsynth"` cross-validation. For
-#'   `"cfm"`/`"apm"`: a length-1 `r` fixes the latent factor count;
-#'   otherwise the count is chosen by the Ahn & Horenstein (2013)
-#'   eigenvalue-ratio criterion over `1..max(r)` (and frozen across placebo
-#'   refits).
+#'   `"apm"`: a length-1 `r` fixes the latent factor count; otherwise the
+#'   count is chosen by the Ahn & Horenstein (2013) eigenvalue-ratio
+#'   criterion over `1..max(r)` (and frozen across placebo refits).
 #' @param force Fixed effects for `"gsynth"`: `"unit"` (default), `"none"`,
 #'   or `"two-way"`.
 #' @param se Inference: `"auto"` maps mean/did/market/factor to `"tstat"`,
 #'   sc/ridge/sdid to `"placebo"`, gsynth/apm to `"bootstrap"` (gsynth:
 #'   parametric bootstrap; apm: the package's multinomial weighted bootstrap
-#'   over units, conditional on the realized treated path), cfm to
-#'   `"analytic"` (the Bai & Wang 2026 plug-in SE: heteroskedasticity-robust
-#'   variance of the pre/post loading regressions plus the
-#'   factor-estimation term, cfm only). `"conformal"`
+#'   over units, conditional on the realized treated path). `"conformal"`
 #'   (methods mean/did/sc/ridge/sdid, `V = NULL`) is the Chernozhukov,
 #'   Wuthrich & Zhu (2021) refit-under-the-null procedure with exact
 #'   (deterministic, no Monte Carlo) permutation distributions: per-period
@@ -91,8 +83,7 @@
 #' @export
 event_study <- function(data, unit, time, ret, treated, event_time,
                         method = c("mean", "did", "market", "factor",
-                                   "sc", "ridge", "sdid", "gsynth", "cfm",
-                                   "apm"),
+                                   "sc", "ridge", "sdid", "gsynth", "apm"),
                         window = c(0, 10), est_window = c(-250, -11), returns,
                         cumulate = c("auto", "sum", "compound", "log"),
                         align = c("position", "value"),
@@ -101,9 +92,16 @@ event_study <- function(data, unit, time, ret, treated, event_time,
                         solver = c("hybrid", "fw", "qp"), lambda = NULL,
                         r = c(0, 5), force = c("unit", "none", "two-way"),
                         se = c("auto", "placebo", "bootstrap", "tstat",
-                               "conformal", "analytic", "none"),
+                               "conformal", "none"),
                         reps = NULL, level = 0.95, cores = 1L,
                         keep_data = TRUE, seed = NULL) {
+  # "cfm" (Bai & Wang causal factor model) is implemented (eng_cfm, with
+  # analytic SEs) but disabled as a public method: its systematic-effect
+  # estimand smears short-lived effects across the event window — Table 1
+  # event-day bias ~-2.3pp on a one-day +3% effect, Table 5 day +1 column
+  # ~0 (see replication table1/table5_new_methods.R and issue #31). The
+  # dispatch arm, guards, and engine tests remain; re-enable by adding
+  # "cfm" to `method` and "analytic" to `se` above.
   method <- match.arg(method)
   cumulate <- match.arg(cumulate)
   match_on <- match.arg(match_on)
@@ -187,8 +185,7 @@ event_study <- function(data, unit, time, ret, treated, event_time,
       # describe a different estimator than the printed point estimate.
       if (!method %in% c("mean", "did", "market", "factor"))
         stop("se = 'tstat' is available for methods mean/did/market/factor; ",
-             "use 'placebo' (sc/ridge/sdid), 'bootstrap' (gsynth/apm), or ",
-             "'analytic' (cfm)")
+             "use 'placebo' (sc/ridge/sdid) or 'bootstrap' (gsynth/apm)")
       inf_tstat(p$Y, p$N0, p$T0, eng, method)
     },
     placebo = inf_placebo(p$Y, p$N0, p$T0, n_treated = length(p$treated),

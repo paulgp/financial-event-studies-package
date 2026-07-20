@@ -1,3 +1,8 @@
+# NOTE: cfm was subsequently disabled as a public method (issue 31; its
+# systematic-effect estimand smears short-lived effects — this script is the
+# evidence). Cached outputs remain valid; to refit cfm, re-enable it in
+# event_study()/event_study_batch() as described in R/event_study.R.
+#
 # Table 2 companion — the two latent-factor additions (cfm, apm) on the
 # Geithner event, same groups/windows/files as table2.R. Both methods use the
 # beforeest files, like the Gsynth column (day 0 is the 3pm-4pm TAQ return in

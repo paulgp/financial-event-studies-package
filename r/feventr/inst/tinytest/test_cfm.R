@@ -1,4 +1,8 @@
-# Causal factor model (Bai & Wang 2026) vs a hand-rolled PCA + lm reference
+# Causal factor model engine (Bai & Wang 2026) vs a hand-rolled reference.
+# cfm is implemented but disabled as a public method (issue 31): its
+# systematic-effect estimand smears short-lived effects across the event
+# window (see replication table1/table5_new_methods.R). The engine stays in
+# the codebase and stays verified here at the internal level.
 
 set.seed(42)
 sim <- feventr::simulate_events(n_units = 60, n_pre = 50, n_candidate = 1,
@@ -6,10 +10,10 @@ sim <- feventr::simulate_events(n_units = 60, n_pre = 50, n_candidate = 1,
 ev <- sim$event_time
 treated_ids <- sim$events$unit
 
-fit <- feventr::event_study(sim$data, "id", "t", "ret",
-                            treated = treated_ids, event_time = ev,
-                            method = "cfm", window = c(0, 5),
-                            est_window = c(-50, -1), returns = "simple", r = 2)
+p <- feventr:::fes_panel(sim$data, "id", "t", "ret", treated = treated_ids,
+                         event_time = ev, window = c(0, 5),
+                         est_window = c(-50, -1))
+eng <- feventr:::eng_cfm(p$Y, p$N0, p$T0, r = 2, se = TRUE)
 
 # --- point estimates: PCA on demeaned donors, pre/post lm on (1, factors) ----
 wide <- reshape(sim$data, idvar = "id", timevar = "t", direction = "wide")
@@ -28,23 +32,16 @@ trt_path <- colMeans(as.matrix(
 m0 <- lm(trt_path[ipre] ~ Fh[ipre, ])
 m1 <- lm(trt_path[ipost] ~ Fh[ipost, ])
 tau_ref <- as.vector(cbind(1, Fh[ipost, ]) %*% (coef(m1) - coef(m0)))
-expect_equivalent(unname(fit$att), tau_ref, tolerance = 1e-8)
+expect_equivalent(unname(eng$tau), tau_ref, tolerance = 1e-8)
 
-# implied counterfactual keeps the realized idiosyncratic shock, so CARs
-# cumulate tau* exactly under the compound convention
-expect_equivalent(unname(fit$car),
-                  feventr:::car_from_paths(trt_path[ipost],
-                                           trt_path[ipost] - tau_ref,
-                                           "compound"),
-                  tolerance = 1e-8)
-
-# pre/post loadings stored for diagnostics
-expect_equal(dim(fit$weights$beta), c(2L, 3L))
-expect_equal(rownames(fit$weights$beta), c("pre", "post"))
-expect_equal(fit$diagnostics$info$r, 2L)
+# contract identity and stored loadings
+expect_equivalent(trt_path[ipost] - eng$y0hat[ipost], eng$tau,
+                  tolerance = 1e-10)
+expect_equal(dim(eng$weights$beta), c(2L, 3L))
+expect_equal(rownames(eng$weights$beta), c("pre", "post"))
+expect_equal(eng$info$r, 2L)
 
 # --- analytic SEs: HC1 blocks + factor-estimation term (Prop 1 / Lemma 4) ----
-expect_equal(fit$se$method, "analytic")
 Zp <- cbind(1, Fh[ipre, ])
 Zq <- cbind(1, Fh[ipost, ])
 e0 <- unname(resid(m0))
@@ -62,61 +59,29 @@ G <- as.vector(Lam %*% solve(crossprod(Lam) / N0d, dl))
 nf <- N0d * (N0d - 4L)
 se_ref <- sqrt(rowSums((Zq %*% C) * Zq) +
                  colSums((G * Ec[, ipost])^2) / nf)
-expect_equivalent(unname(fit$se$att), se_ref, tolerance = 1e-8)
+expect_equivalent(unname(eng$info$se$att), se_ref, tolerance = 1e-8)
 
 zbar <- colMeans(Zq)
 ebar <- rowMeans(Ec[, ipost])
 avg_ref <- sqrt(sum(zbar * as.vector(C %*% zbar)) + sum((G * ebar)^2) / nf)
-expect_equivalent(fit$att_avg_se, avg_ref, tolerance = 1e-8)
+expect_equivalent(eng$info$se$avg, avg_ref, tolerance = 1e-8)
 
-# --- factor-count selection and refit freezing -------------------------------
-fit_ah <- feventr::event_study(sim$data, "id", "t", "ret",
-                               treated = treated_ids, event_time = ev,
-                               method = "cfm", window = c(0, 5),
-                               est_window = c(-50, -1), returns = "simple")
-expect_true(fit_ah$diagnostics$info$r %in% 1:5)
+# --- eigenvalue-ratio factor-count selection and guards ----------------------
+eng_ah <- feventr:::eng_cfm(p$Y, p$N0, p$T0, r = c(0, 5), se = FALSE)
+expect_true(eng_ah$info$r %in% 1:5)
+expect_error(feventr:::eng_cfm(p$Y, p$N0, p$T0, r = 20),
+             pattern = "between 1 and")
 
-# placebo inference reruns the engine on donors (with the selected r frozen)
-fit_pl <- feventr::event_study(sim$data, "id", "t", "ret",
-                               treated = treated_ids, event_time = ev,
-                               method = "cfm", window = c(0, 5),
-                               est_window = c(-50, -1), returns = "simple",
-                               se = "placebo", reps = 19, seed = 1)
-expect_equal(fit_pl$se$method, "placebo")
-expect_equal(length(fit_pl$se$att), 6L)
-expect_equivalent(unname(fit_pl$att), unname(fit_ah$att), tolerance = 1e-10)
-
-# --- guards ------------------------------------------------------------------
+# --- disabled as a public option ---------------------------------------------
 expect_error(feventr::event_study(sim$data, "id", "t", "ret",
                                   treated = treated_ids, event_time = ev,
                                   method = "cfm", window = c(0, 5),
-                                  est_window = c(-50, -1), returns = "simple",
-                                  se = "conformal"),
-             pattern = "conformal")
-expect_error(feventr::event_study(sim$data, "id", "t", "ret",
-                                  treated = treated_ids, event_time = ev,
-                                  method = "cfm", window = c(0, 5),
-                                  est_window = c(-50, -1), returns = "simple",
-                                  se = "tstat"),
-             pattern = "tstat")
+                                  est_window = c(-50, -1),
+                                  returns = "simple"),
+             pattern = "arg")
 expect_error(feventr::event_study(sim$data, "id", "t", "ret",
                                   treated = treated_ids, event_time = ev,
                                   method = "mean", window = c(0, 5),
                                   est_window = c(-50, -1), returns = "simple",
                                   se = "analytic"),
-             pattern = "analytic")
-expect_error(feventr::event_study(sim$data, "id", "t", "ret",
-                                  treated = treated_ids, event_time = ev,
-                                  method = "cfm", window = c(0, 5),
-                                  est_window = c(-50, -1), returns = "simple",
-                                  r = 20),
-             pattern = "between 1 and")
-
-# --- batch mode --------------------------------------------------------------
-b <- feventr::event_study_batch(sim$data, "id", "t", "ret",
-                                events = data.frame(unit = treated_ids,
-                                                    event_time = ev),
-                                method = "cfm", window = c(0, 5),
-                                est_window = c(-50, -1), returns = "simple",
-                                r = 2)
-expect_equivalent(unname(b$att), unname(fit$att), tolerance = 1e-10)
+             pattern = "arg")

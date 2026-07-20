@@ -1,10 +1,10 @@
-K=10 t0=100 mean       0.2s (0.016s/event, 10/10 ok)
-K=10 t0=100 did        0.2s (0.016s/event, 10/10 ok)
+K=10 t0=100 mean       0.2s (0.017s/event, 10/10 ok)
+K=10 t0=100 did        0.2s (0.015s/event, 10/10 ok)
 K=10 t0=100 market     0.2s (0.015s/event, 10/10 ok)
-K=10 t0=100 factor     0.2s (0.016s/event, 10/10 ok)
-K=10 t0=100 sc         0.4s (0.043s/event, 10/10 ok)
-K=10 t0=100 ridge      0.5s (0.049s/event, 10/10 ok)
-K=10 t0=100 sdid      13.1s (1.313s/event, 10/10 ok)
+K=10 t0=100 factor     0.2s (0.015s/event, 10/10 ok)
+K=10 t0=100 sc         0.4s (0.039s/event, 10/10 ok)
+K=10 t0=100 ridge      0.5s (0.046s/event, 10/10 ok)
+K=10 t0=100 sdid      13.2s (1.316s/event, 10/10 ok)
 Cross-validating ... 
  r = 0; sigma2 = 0.00021; IC = -8.37108; PC = 0.00021; MSPE = 0.00012
  r = 1; sigma2 = 0.00007; IC = -9.34857; PC = 0.00007; MSPE = 0.00006*
@@ -105,16 +105,15 @@ Cross-validating ...
 
  r* = 1
 
-K=10 t0=100 gsynth     1.1s (0.109s/event, 10/10 ok)
-K=10 t0=100 cfm        0.2s (0.021s/event, 10/10 ok)
-K=10 t0=100 apm        0.8s (0.083s/event, 10/10 ok)
-K=50 t0=100 mean       1.0s (0.019s/event, 50/50 ok)
-K=50 t0=100 did        0.9s (0.019s/event, 50/50 ok)
+K=10 t0=100 gsynth     1.1s (0.111s/event, 10/10 ok)
+K=10 t0=100 apm        0.8s (0.082s/event, 10/10 ok)
+K=50 t0=100 mean       1.1s (0.021s/event, 50/50 ok)
+K=50 t0=100 did        1.0s (0.019s/event, 50/50 ok)
 K=50 t0=100 market     1.0s (0.019s/event, 50/50 ok)
 K=50 t0=100 factor     1.0s (0.019s/event, 50/50 ok)
-K=50 t0=100 sc         2.1s (0.042s/event, 50/50 ok)
-K=50 t0=100 ridge      2.5s (0.050s/event, 50/50 ok)
-K=50 t0=100 sdid      71.4s (1.428s/event, 50/50 ok)
+K=50 t0=100 sc         2.2s (0.044s/event, 50/50 ok)
+K=50 t0=100 ridge      2.6s (0.051s/event, 50/50 ok)
+K=50 t0=100 sdid      71.3s (1.425s/event, 50/50 ok)
 Cross-validating ... 
  r = 0; sigma2 = 0.00017; IC = -8.59804; PC = 0.00017; MSPE = 0.00015
  r = 1; sigma2 = 0.00007; IC = -9.36240; PC = 0.00007; MSPE = 0.00007
@@ -615,16 +614,15 @@ Cross-validating ...
 
  r* = 2
 
-K=50 t0=100 gsynth     6.0s (0.120s/event, 50/50 ok)
-K=50 t0=100 cfm        1.3s (0.026s/event, 50/50 ok)
-K=50 t0=100 apm        4.5s (0.091s/event, 50/50 ok)
-K=10 t0=250 mean       0.3s (0.030s/event, 10/10 ok)
-K=10 t0=250 did        0.3s (0.031s/event, 10/10 ok)
-K=10 t0=250 market     0.3s (0.030s/event, 10/10 ok)
-K=10 t0=250 factor     0.3s (0.030s/event, 10/10 ok)
+K=50 t0=100 gsynth     5.9s (0.118s/event, 50/50 ok)
+K=50 t0=100 apm        4.4s (0.088s/event, 50/50 ok)
+K=10 t0=250 mean       0.3s (0.029s/event, 10/10 ok)
+K=10 t0=250 did        0.3s (0.029s/event, 10/10 ok)
+K=10 t0=250 market     0.3s (0.029s/event, 10/10 ok)
+K=10 t0=250 factor     0.3s (0.029s/event, 10/10 ok)
 K=10 t0=250 sc         0.8s (0.083s/event, 10/10 ok)
-K=10 t0=250 ridge      1.4s (0.142s/event, 10/10 ok)
-K=10 t0=250 sdid      35.0s (3.496s/event, 10/10 ok)
+K=10 t0=250 ridge      1.4s (0.143s/event, 10/10 ok)
+K=10 t0=250 sdid      34.9s (3.492s/event, 10/10 ok)
 Cross-validating ... 
  r = 0; sigma2 = 0.00019; IC = -8.49746; PC = 0.00019; MSPE = 0.00013
  r = 1; sigma2 = 0.00007; IC = -9.46784; PC = 0.00007; MSPE = 0.00007
@@ -725,16 +723,15 @@ Cross-validating ...
 
  r* = 2
 
-K=10 t0=250 gsynth     4.8s (0.477s/event, 10/10 ok)
-K=10 t0=250 cfm        0.7s (0.066s/event, 10/10 ok)
-K=10 t0=250 apm        2.6s (0.258s/event, 10/10 ok)
+K=10 t0=250 gsynth     4.7s (0.473s/event, 10/10 ok)
+K=10 t0=250 apm        2.6s (0.261s/event, 10/10 ok)
 K=50 t0=250 mean       1.7s (0.034s/event, 50/50 ok)
-K=50 t0=250 did        1.8s (0.035s/event, 50/50 ok)
+K=50 t0=250 did        1.9s (0.037s/event, 50/50 ok)
 K=50 t0=250 market     1.7s (0.034s/event, 50/50 ok)
-K=50 t0=250 factor     1.7s (0.035s/event, 50/50 ok)
+K=50 t0=250 factor     1.7s (0.034s/event, 50/50 ok)
 K=50 t0=250 sc         4.6s (0.091s/event, 50/50 ok)
-K=50 t0=250 ridge      7.7s (0.154s/event, 50/50 ok)
-K=50 t0=250 sdid     181.2s (3.624s/event, 50/50 ok)
+K=50 t0=250 ridge      7.5s (0.151s/event, 50/50 ok)
+K=50 t0=250 sdid     178.3s (3.566s/event, 50/50 ok)
 Cross-validating ... 
  r = 0; sigma2 = 0.00020; IC = -8.47795; PC = 0.00020; MSPE = 0.00028
  r = 1; sigma2 = 0.00007; IC = -9.46362; PC = 0.00007; MSPE = 0.00008
@@ -1235,16 +1232,15 @@ Cross-validating ...
 
  r* = 3
 
-K=50 t0=250 gsynth    25.1s (0.501s/event, 50/50 ok)
-K=50 t0=250 cfm        3.6s (0.072s/event, 50/50 ok)
-K=50 t0=250 apm       13.4s (0.267s/event, 50/50 ok)
+K=50 t0=250 gsynth    24.7s (0.495s/event, 50/50 ok)
+K=50 t0=250 apm       13.5s (0.269s/event, 50/50 ok)
 se=auto t0=250 mean        0.0s (tstat)
 se=auto t0=250 did         0.0s (tstat)
 se=auto t0=250 market      0.0s (tstat)
 se=auto t0=250 factor      0.0s (tstat)
 se=auto t0=250 sc          5.5s (placebo)
 se=auto t0=250 ridge       6.5s (placebo)
-se=auto t0=250 sdid      329.5s (placebo)
+se=auto t0=250 sdid      327.6s (placebo)
 Cross-validating ... 
  r = 0; sigma2 = 0.00020; IC = -8.49494; PC = 0.00019; MSPE = 0.00013
  r = 1; sigma2 = 0.00007; IC = -9.46831; PC = 0.00007; MSPE = 0.00007
@@ -1256,19 +1252,17 @@ Cross-validating ...
  r* = 2
 
 Simulating errors .............Bootstrapping ...
-..........se=auto t0=250 gsynth    108.8s (bootstrap)
-se=auto t0=250 cfm         0.1s (analytic)
-se=auto t0=250 apm        24.6s (bootstrap)
+..........se=auto t0=250 gsynth    107.9s (bootstrap)
+se=auto t0=250 apm        24.3s (bootstrap)
 
 | `method =` | estimation only, t0=100 | estimation only, t0=250 | with `se = "auto"`, t0=250 |
 |---|---:|---:|---:|
 | `mean` | 0.02s | 0.03s | 0.02s |
 | `did` | 0.02s | 0.04s | 0.03s |
 | `market` | 0.02s | 0.03s | 0.03s |
-| `factor` | 0.02s | 0.04s | 0.02s |
-| `sc` | 0.04s | 0.09s | 5.50s |
-| `ridge` | 0.05s | 0.15s | 6.50s |
-| `sdid` | 1.43s | 3.62s | 330s |
-| `gsynth` | 0.12s | 0.50s | 109s |
-| `cfm` | 0.03s | 0.07s | 0.07s |
-| `apm` | 0.09s | 0.27s | 25s |
+| `factor` | 0.02s | 0.03s | 0.03s |
+| `sc` | 0.04s | 0.09s | 5.52s |
+| `ridge` | 0.05s | 0.15s | 6.55s |
+| `sdid` | 1.43s | 3.57s | 328s |
+| `gsynth` | 0.12s | 0.49s | 108s |
+| `apm` | 0.09s | 0.27s | 24s |

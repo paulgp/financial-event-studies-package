@@ -8,8 +8,8 @@
 #
 # Stage 2 — with default inference: single-event event_study() fits at
 # se = "auto" (t-stat for mean/did/market/factor, placebo 100 reps for
-# sc/ridge/sdid, parametric bootstrap 1,000 for gsynth, analytic for cfm,
-# weighted bootstrap 200 for apm), t0 = 250, same 500-donor DGP.
+# sc/ridge/sdid, parametric bootstrap 1,000 for gsynth, weighted bootstrap
+# 200 for apm), t0 = 250, same 500-donor DGP.
 #
 # DGP: 500 donors + one treated unit per cohort, two-factor returns, events
 # spaced 12 trading periods apart, window c(0, 10).
@@ -19,7 +19,7 @@ suppressMessages(library(feventr))
 
 n_donors <- 500L
 methods <- c("mean", "did", "market", "factor", "sc", "ridge", "sdid",
-             "gsynth", "cfm", "apm")
+             "gsynth", "apm")
 if (!requireNamespace("gsynth", quietly = TRUE))
   methods <- setdiff(methods, "gsynth")
 if (!requireNamespace("apm", quietly = TRUE))

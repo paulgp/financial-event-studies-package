@@ -1,3 +1,8 @@
+# NOTE: cfm was subsequently disabled as a public method (issue 31; its
+# systematic-effect estimand smears short-lived effects — this script is the
+# evidence). Cached outputs remain valid; to refit cfm, re-enable it in
+# event_study()/event_study_batch() as described in R/event_study.R.
+#
 # Table 1 companion — the two latent-factor additions (cfm, apm) through the
 # published simulation designs (table1_common.R: two-factor selection DGP,
 # 50 sims per panel, seeds 1234..1283), fit via feventr::event_study() on

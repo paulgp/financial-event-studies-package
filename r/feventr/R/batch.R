@@ -60,7 +60,7 @@
 #' @export
 event_study_batch <- function(data, unit, time, ret, events,
                               method = c("mean", "did", "market", "factor",
-                                         "sc", "ridge", "sdid", "gsynth", "cfm",
+                                         "sc", "ridge", "sdid", "gsynth",
                                          "apm"),
                               window = c(0, 10), est_window = c(-250, -11),
                               returns, cumulate = c("auto", "sum", "compound", "log"),
@@ -78,7 +78,7 @@ event_study_batch <- function(data, unit, time, ret, events,
   se <- match.arg(se)
   align <- match.arg(align)
   event_se <- match.arg(event_se, c("none", "auto", "tstat", "placebo",
-                                    "bootstrap", "analytic"))
+                                    "bootstrap"))
   events <- as.data.frame(events)
   stopifnot(all(c("unit", "event_time") %in% names(events)))
   # [["event"]], not $event: partial matching would hit `event_time` whenever
