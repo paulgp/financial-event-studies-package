@@ -17,10 +17,16 @@ read_method <- function(m) {
                    pattern = "^cohort_[0-9]+[.]csv$", full.names = TRUE)
   if (!length(fs)) return(NULL)
   d <- rbindlist(lapply(fs, fread), fill = TRUE)
+  ok <- d[status == "ok"]
   cat(sprintf("%s: %d cohorts, %d deal fits ok, %d skipped/failed\n",
-              m, length(fs), sum(d$status == "ok"), sum(d$status != "ok")))
-  d[status == "ok", .(permno = as.numeric(permno), date_index,
-                      car_refit = car_log_1, r, pre_rmse)]
+              m, length(fs), uniqueN(ok, by = c("permno", "date_index")),
+              nrow(d[status != "ok"])))
+  # [-1,+h] log CARs are path differences against event_date == -2
+  ok[, .(car_refit = car_log[event_date == 1L] - car_log[event_date == -2L],
+         car_refit_250 = car_log[event_date == 250L] -
+           car_log[event_date == -2L],
+         r = r[1L], pre_rmse = pre_rmse[1L]),
+     by = .(permno, date_index)][, permno := as.numeric(permno)][]
 }
 
 methods <- Filter(function(m) dir.exists(file.path("ma", "ma_refit_out", m)),

@@ -94,15 +94,16 @@ fit_cohort <- function(ix, ann, method) {
                        method = method, window = c(-30, 250),
                        est_window = c(-280, -31), returns = "simple",
                        cumulate = "log", se = "none", keep_data = FALSE)
-      ed <- as.integer(names(f$car))
-      car_at <- function(h) unname(f$car[ed == h])
+      # full per-deal path (one row per event day, like the original
+      # stacked gsynth output): att and the cumulative log CAR from -30;
+      # horizon CARs from -1 are path differences vs event_date == -2
       data.table(date_index = ix, ann_tdate = ann, permno = tr,
+                 event_date = as.integer(names(f$car)),
+                 att = as.numeric(f$att), car_log = as.numeric(f$car),
                  n_units = length(donors) + 1L,
                  n_treated_date = length(tr_all),
                  r = f$diagnostics$info$r %||% NA_integer_,
                  pre_rmse = f$diagnostics$info$pre_rmse %||% NA_real_,
-                 car_log_1 = car_at(1L) - car_at(-2L),
-                 car_log_250 = car_at(250L) - car_at(-2L),
                  status = "ok")
     }, error = function(e)
       data.table(date_index = ix, ann_tdate = ann, permno = tr,
@@ -117,13 +118,25 @@ fit_cohort <- function(ix, ann, method) {
 for (method in methods) {
   outdir <- file.path("ma", "ma_refit_out", method)
   dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+  # MA_REFIT_MAX_NEW=n caps the number of not-yet-checkpointed cohorts this
+  # invocation fits, so a run can be sized to finish inside a time budget
+  # and chained; completed cohorts are skipped as usual
+  max_new <- Sys.getenv("MA_REFIT_MAX_NEW", "")
+  work <- cohorts
+  if (nzchar(max_new)) {
+    have <- file.exists(file.path(outdir, sprintf("cohort_%d.csv",
+                                                  cohorts$date_index)))
+    work <- cohorts[!have][seq_len(min(as.integer(max_new), sum(!have)))]
+    cat(sprintf("%s: %d cohorts checkpointed, fitting next %d\n",
+                method, sum(have), nrow(work)))
+  }
   t0 <- proc.time()[3]
-  st <- mclapply(seq_len(nrow(cohorts)), function(k) {
+  st <- mclapply(seq_len(nrow(work)), function(k) {
     setDTthreads(1L)
-    ix <- cohorts$date_index[k]
+    ix <- work$date_index[k]
     fn <- file.path(outdir, sprintf("cohort_%d.csv", ix))
     if (file.exists(fn)) return("skip")
-    res <- tryCatch(fit_cohort(ix, cohorts$ann_tdate[k], method),
+    res <- tryCatch(fit_cohort(ix, work$ann_tdate[k], method),
                     error = function(e) e)
     if (inherits(res, "error")) return(paste0("failed: ",
                                               conditionMessage(res)))
@@ -131,7 +144,8 @@ for (method in methods) {
     fwrite(res, tmp)
     file.rename(tmp, fn)
     "done"
-  }, mc.cores = 6L, mc.preschedule = FALSE)
+  }, mc.cores = as.integer(Sys.getenv("MA_REFIT_CORES", "6")),
+     mc.preschedule = FALSE)
   nulls <- sum(vapply(st, is.null, TRUE))
   cat(sprintf("%s: %s%s | %.1f min\n", method,
               paste(names(table(unlist(st))), table(unlist(st)),

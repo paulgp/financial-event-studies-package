@@ -128,6 +128,29 @@ transcribed from the PDF into `replication/targets/` and every reproduced
 table is compared cell-by-cell; see `PLAN.md` for per-table verification
 verdicts and documented deviations.
 
+### The M&A example end-to-end
+
+The paper's largest application — Table 6's 14,847 acquirer deals — also
+runs end-to-end through the package rather than consuming the paper's saved
+fits. `replication/ma/ma_refit_full.R` rebuilds all 7,052 announcement-date
+event panels from CRSP daily (4,000–4,300 complete-coverage donors × 531
+trading days each; forked workers share the keyed 4 GB panel copy-on-write,
+so there are no per-worker copies and no intermediate panel cache) and fits
+every deal separately — the treated acquirer against a donor pool excluding
+all same-day acquirers, `window = c(-30, 250)`, `est_window = c(-280, -31)`,
+log CARs — checkpointed per announcement date and method (~75 minutes for
+`sc` at 6 cores; the same runner produces the `apm` column).
+`ma_refit_compare.R` then reproduces the Table 6 cells: the sc and apm
+refits match the paper's saved per-deal gsynth CARs at deal-level
+correlations 0.96 and 0.84, and both reproduce every subsample cell's sign
+and ordering. `ma_refit_longrun.R` extends the horizon to +250 trading
+days, where acquirers drift steadily negative after the announcement-day
+pop under every counterfactual — by +250 days, −23% (gsynth), −32% (apm),
+and −46% (sc) overall, with 100%-stock deals roughly twice as bad as
+100%-cash under each. The magnitude of the long-run drift depends on the
+counterfactual; the cash/stock gap and the ordering do not
+(`replication/output/ma_longrun.png`).
+
 ## Installation
 
 ```r
