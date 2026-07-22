@@ -147,9 +147,26 @@ and ordering. `ma_refit_longrun.R` extends the horizon to +250 trading
 days, where acquirers drift steadily negative after the announcement-day
 pop under every counterfactual — by +250 days, −23% (gsynth), −32% (apm),
 and −46% (sc) overall, with 100%-stock deals roughly twice as bad as
-100%-cash under each. The magnitude of the long-run drift depends on the
-counterfactual; the cash/stock gap and the ordering do not
-(`replication/output/ma_longrun.png`).
+100%-cash under each (`replication/output/ma_longrun.png`).
+
+Two inference lessons come with the long horizon. First, deals cluster on
+announcement dates and 250-day windows overlap across deals announced
+within a year of each other, so naive cross-deal SEs are fiction:
+`ma_refit_longrun.R`'s default bands are a circular block bootstrap over
+announcement time (18-month blocks of announcement months, longer than
+the event window), and the implied design effects are 3–11× the naive
+SEs at horizons beyond a month. Second, the long-run *levels* are mostly
+mechanical, not causal: `ma_placebo_check.R` re-runs the identical
+pipeline on one date-matched placebo non-acquirer per deal, and the
+placebo path itself drifts to −51% by +250 days (−44% cash-matched,
+−63% stock-matched) — cumulated log returns of one volatile stock
+against a diversified synthetic portfolio lose roughly σ²/2 per day to
+volatility drag. Measured against that placebo benchmark, the
+announcement-window effect survives (treated sits outside the placebo
+95% band at short horizons in every subsample), cash acquirers modestly
+outperform their placebos over the first quarter, but the headline
+long-run drift is inside the placebo band almost everywhere
+(`replication/output/ma_placebo_check.png`).
 
 ## Installation
 

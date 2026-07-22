@@ -32,6 +32,11 @@ ma_work <- function(...) dind("M&A", "data", "work", ...)
 methods <- commandArgs(trailingOnly = TRUE)
 if (!length(methods)) methods <- c("sc", "apm")
 stopifnot(all(methods %in% c("sc", "apm", "gsynth")))
+# MA_REFIT_PLACEBO=1: instead of the real acquirers, fit one date-matched
+# placebo donor per deal (deterministic per-cohort draw, real acquirers
+# excluded from pools), storing the matched real deal for subsample tags.
+# Output goes to ma_refit_out/placebo_<method>/.
+placebo <- nzchar(Sys.getenv("MA_REFIT_PLACEBO", ""))
 
 cat("loading inputs (CRSP daily is 4GB; a few minutes) ...\n")
 crsp <- as.data.table(read_dta(ma_work("crsp_daily_raw_2023_cleaned.dta"),
@@ -81,11 +86,24 @@ fit_cohort <- function(ix, ann, method) {
   tr_all <- as.character(pdix[date_index == ix, permno])
   tr_in <- intersect(tr_all, unique(pan$permno))
   donors <- setdiff(unique(pan$permno), tr_all)
+  if (placebo) {
+    set.seed(1000000L + ix)
+    cand <- setdiff(unique(pan$permno), tr_all)
+    fit_units <- sample(cand, min(length(tr_all), length(cand)))
+    matched <- tr_all[seq_along(fit_units)]
+    donors_fit <- setdiff(donors, fit_units)
+  } else {
+    fit_units <- tr_all
+    matched <- tr_all
+    donors_fit <- donors
+  }
   rows <- list()
-  for (tr in tr_all) {
-    if (!tr %in% tr_in) {
-      rows[[tr]] <- data.table(date_index = ix, ann_tdate = ann, permno = tr,
-                               status = "skipped: no complete CRSP coverage")
+  for (k in seq_along(fit_units)) {
+    tr <- fit_units[k]
+    if (!placebo && !tr %in% tr_in) {
+      rows[[k]] <- data.table(date_index = ix, ann_tdate = ann, permno = tr,
+                              matched_permno = matched[k],
+                              status = "skipped: no complete CRSP coverage")
       next
     }
     res <- tryCatch({
@@ -93,22 +111,25 @@ fit_cohort <- function(ix, ann, method) {
                        ret = "daret", treated = tr, event_time = 0,
                        method = method, window = c(-30, 250),
                        est_window = c(-280, -31), returns = "simple",
-                       cumulate = "log", se = "none", keep_data = FALSE)
+                       cumulate = "log", se = "none", keep_data = FALSE,
+                       donors = donors_fit)
       # full per-deal path (one row per event day, like the original
       # stacked gsynth output): att and the cumulative log CAR from -30;
       # horizon CARs from -1 are path differences vs event_date == -2
       data.table(date_index = ix, ann_tdate = ann, permno = tr,
+                 matched_permno = matched[k],
                  event_date = as.integer(names(f$car)),
                  att = as.numeric(f$att), car_log = as.numeric(f$car),
-                 n_units = length(donors) + 1L,
+                 n_units = length(donors_fit) + 1L,
                  n_treated_date = length(tr_all),
                  r = f$diagnostics$info$r %||% NA_integer_,
                  pre_rmse = f$diagnostics$info$pre_rmse %||% NA_real_,
                  status = "ok")
     }, error = function(e)
       data.table(date_index = ix, ann_tdate = ann, permno = tr,
+                 matched_permno = matched[k],
                  status = paste0("failed: ", conditionMessage(e))))
-    rows[[tr]] <- res
+    rows[[k]] <- res
   }
   rbindlist(rows, fill = TRUE)
 }
@@ -116,7 +137,8 @@ fit_cohort <- function(ix, ann, method) {
 `%||%` <- function(a, b) if (is.null(a) || !length(a)) b else a
 
 for (method in methods) {
-  outdir <- file.path("ma", "ma_refit_out", method)
+  outdir <- file.path("ma", "ma_refit_out",
+                      paste0(if (placebo) "placebo_" else "", method))
   dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
   # MA_REFIT_MAX_NEW=n caps the number of not-yet-checkpointed cohorts this
   # invocation fits, so a run can be sized to finish inside a time budget
