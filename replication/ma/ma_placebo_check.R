@@ -41,13 +41,23 @@ read_paths <- function(dir, tag_col) {
                    pattern = "^cohort_[0-9]+[.]csv$", full.names = TRUE)
   if (!length(fs)) stop("no fits in ma_refit_out/", dir)
   d <- rbindlist(lapply(fs, fread), fill = TRUE)[status == "ok"]
-  d[, base := car_log[event_date == -2L], by = .(permno, date_index)]
+  setorder(d, permno, date_index, event_date)
+  # headline metric: additive CATT in simple returns (cumulated att) —
+  # no per-day Jensen term, unlike the Table 6 log convention; both
+  # metrics land in the CSV
+  d[, car_arith := cumsum(fifelse(is.finite(att), att, 0)),
+    by = .(permno, date_index)]
+  d[, `:=`(base_l = car_log[event_date == -2L],
+           base_a = car_arith[event_date == -2L]),
+    by = .(permno, date_index)]
   # fread parses ann_tdate as IDate; keep it character so the month grid
   # (built via unlist, which strips the class) stays in "YYYY-MM-DD" form
   d <- d[event_date >= -1L,
          .(tag = as.numeric(get(tag_col)), date_index,
            ann_tdate = as.character(ann_tdate),
-           event_date, car = car_log - base)]
+           event_date, log = car_log - base_l, arith = car_arith - base_a)]
+  d <- melt(d, measure.vars = c("arith", "log"), variable.name = "metric",
+            value.name = "car")
   merge(d, deals[, .(tag = permno, date_index, pct_cash, pct_stk)],
         by = c("tag", "date_index"), allow.cartesian = TRUE)
 }
@@ -98,19 +108,23 @@ pool_boot <- function(d, m) {
   }
   rbindlist(out)
 }
-pp <- rbindlist(Map(pool_boot, paths, names(paths)))
+pp <- rbindlist(lapply(names(paths), function(m)
+  rbindlist(lapply(c("arith", "log"), function(g)
+    pool_boot(paths[[m]][metric == g], m)[, metric := g]))))
 write.csv(pp, out_path("ma_placebo_check.csv"), row.names = FALSE)
 
+pa <- pp[metric == "arith"]
 hz <- c(1, 21, 63, 126, 250)
-wide <- merge(pp[role == "Treated",
+wide <- merge(pa[role == "Treated",
                  .(subsample, event_date, treated = mean_car)],
-              pp[role == "Placebo",
+              pa[role == "Placebo",
                  .(subsample, event_date, placebo = mean_car,
                    plo = lo, phi = hi, pse = boot_se)],
               by = c("subsample", "event_date"))
 wide[, outside := treated < plo | treated > phi]
-cat(sprintf("\nPlacebo check, method = %s (%%, at selected horizons):\n",
-            method))
+cat(sprintf(
+  "\nPlacebo check, method = %s (additive CATT %%, at selected horizons):\n",
+  method))
 print(dcast(wide[event_date %in% hz,
                  .(subsample, event_date,
                    cell = sprintf("t %6.2f | p %5.2f (%4.2f) %s",
@@ -129,20 +143,20 @@ cat(sprintf("treated outside placebo 95%% band at horizons >= +21: %d/%d\n",
 ## ---- figure -------------------------------------------------------------------
 png(out_path("ma_placebo_check.png"), width = 2600, height = 1000, res = 240)
 par(mfrow = c(1, 3), mar = c(4, 4.2, 2.5, 2), mgp = c(2.4, 0.7, 0), las = 1)
-ylim <- 100 * range(pp$lo, pp$hi, pp$mean_car, finite = TRUE)
+ylim <- 100 * range(pa$lo, pa$hi, pa$mean_car, finite = TRUE)
 for (s in c("Full sample", "Cash merger", "Stock merger")) {
   plot(NA, xlim = c(-1, 255), ylim = ylim, xlab = "Event day",
        ylab = if (s == "Full sample")
-         "Mean log CAR from day -1 (%)" else "",
+         "Mean additive CATT from day -1 (%)" else "",
        main = s, cex.main = 0.95, font.main = 1, bty = "n", xaxt = "n")
   axis(1, at = c(0, 50, 100, 150, 200, 250))
   grid(nx = NA, ny = NULL, col = "#d8d8d8", lty = 1, lwd = 0.5)
   abline(h = 0, col = "#9a9a9a", lwd = 0.7)
-  pl <- pp[role == "Placebo" & subsample == s][order(event_date)]
+  pl <- pa[role == "Placebo" & subsample == s][order(event_date)]
   polygon(c(pl$event_date, rev(pl$event_date)), 100 * c(pl$lo, rev(pl$hi)),
           col = "#d9d9d9", border = NA)
   lines(pl$event_date, 100 * pl$mean_car, col = "#6b6b6b", lwd = 2)
-  tr <- pp[role == "Treated" & subsample == s][order(event_date)]
+  tr <- pa[role == "Treated" & subsample == s][order(event_date)]
   lines(tr$event_date, 100 * tr$mean_car, col = "#2a78d6", lwd = 2)
   if (s == "Full sample")
     legend("bottomleft",

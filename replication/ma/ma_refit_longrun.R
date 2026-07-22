@@ -1,9 +1,19 @@
-# M&A long-run effects — pooled [-1, h] log CAR paths out to +250 trading
+# M&A long-run effects — pooled [-1, h] CAR paths out to +250 trading
 # days after announcement, by deal type, for three counterfactuals: the
 # published per-deal gsynth paths (sc_ma_1_7052.dta, no refit) and the
 # feventr sc/apm refits (ma_refit_full.R path output). Deal sample and
 # subsamples exactly as Table 6 (published 14,847 deals; 100% cash /
 # 100% stock).
+#
+# Metric: the HEADLINE paths are additive CATTs in simple returns
+# (cumulated daily att = r_treated - y0hat), the paper's estimand. The
+# Table 6 log convention (sum of log1p of realized and predicted simple
+# returns) is immaterial over 3 days but accrues a per-day Jensen term
+# at long horizons — log1p of a smooth prediction vs log1p of a noisy
+# realization loses ~sigma_idio^2/2 per day — worth -23% vs -11% at
+# +250 on the paper's own saved gsynth fits. Both metrics are written
+# to the CSV (`metric` = "arith"/"log"); tables and the figure use
+# "arith".
 #
 # Inference: deal CARs are cross-sectionally dependent — deals cluster on
 # announcement dates and 250-day windows overlap across deals announced
@@ -48,12 +58,20 @@ read_refit_paths <- function(m) {
                    pattern = "^cohort_[0-9]+[.]csv$", full.names = TRUE)
   if (!length(fs)) return(NULL)
   d <- rbindlist(lapply(fs, fread), fill = TRUE)[status == "ok"]
-  d[, base := car_log[event_date == -2L], by = .(permno, date_index)]
+  setorder(d, permno, date_index, event_date)
+  d[, car_arith := cumsum(fifelse(is.finite(att), att, 0)),
+    by = .(permno, date_index)]
+  d[, `:=`(base_l = car_log[event_date == -2L],
+           base_a = car_arith[event_date == -2L]),
+    by = .(permno, date_index)]
   # fread parses ann_tdate as IDate; keep it character so the month grid
   # (built via unlist, which strips the class) stays in "YYYY-MM-DD" form
   d <- d[event_date >= -1L, .(permno = as.numeric(permno), date_index,
                               ann_tdate = as.character(ann_tdate),
-                              event_date, car = car_log - base)]
+                              event_date, log = car_log - base_l,
+                              arith = car_arith - base_a)]
+  d <- melt(d, measure.vars = c("arith", "log"), variable.name = "metric",
+            value.name = "car")
   # one acquirer path can serve several same-day deals (multi-target
   # announcements): expand 1:m to deal level, as table6.R Part A does
   merge(d, deals[, .(permno, date_index, pct_cash, pct_stk)],
@@ -76,11 +94,15 @@ read_gsynth_paths <- function() {
     z <- log1p(fcoalesce(x, 0))
     fifelse(is.finite(z), z, 0)
   }
-  sc[, car := cumsum(l1(daret_treated)) - cumsum(l1(daret_sc)),
+  sc[, `:=`(log = cumsum(l1(daret_treated)) - cumsum(l1(daret_sc)),
+            arith = cumsum(fcoalesce(daret_treated, 0)) -
+              cumsum(fcoalesce(daret_sc, 0))),
      by = .(permno, ann_tdate)]
   sc <- sc[, n_days := .N, by = .(permno, ann_tdate)][n_days == 252L]
-  merge(sc[, .(permno, ann_tdate, event_date, car)],
-        deals[, .(permno, ann_tdate, date_index, pct_cash, pct_stk)],
+  sc <- melt(sc[, .(permno, ann_tdate, event_date, arith, log)],
+             measure.vars = c("arith", "log"), variable.name = "metric",
+             value.name = "car")
+  merge(sc, deals[, .(permno, ann_tdate, date_index, pct_cash, pct_stk)],
         by = c("permno", "ann_tdate"), allow.cartesian = TRUE)
 }
 
@@ -141,18 +163,25 @@ pool_boot <- function(d, m) {
   }
   rbindlist(out)
 }
-pp <- rbindlist(Map(pool_boot, paths, names(paths)))
+pp <- rbindlist(lapply(names(paths), function(m)
+  rbindlist(lapply(c("arith", "log"), function(g)
+    pool_boot(paths[[m]][metric == g], m)[, metric := g]))))
 write.csv(pp, out_path("ma_longrun_paths.csv"), row.names = FALSE)
 
 hz <- c(1, 21, 63, 126, 250)
-cat("\nMean [-1,+h] log CAR (%), naive cross-deal SE / block-bootstrap SE:\n")
-tabh <- dcast(pp[event_date %in% hz,
+cat("\nMean [-1,+h] additive CATT (%), naive cross-deal SE / block-bootstrap SE:\n")
+tabh <- dcast(pp[metric == "arith" & event_date %in% hz,
                  .(method, subsample, event_date,
                    cell = sprintf("%6.2f (%.2f / %.2f)", 100 * mean_car,
                                   100 * se, 100 * boot_se))],
               method + subsample ~ event_date, value.var = "cell")
 print(tabh, row.names = FALSE)
-infl <- pp[event_date >= 21, .(design_effect = median(boot_se / se)),
+cat("\nlog-vs-arith gap at +250 (pp, pooled; the per-day Jensen term):\n")
+print(dcast(pp[event_date == 250,
+               .(method, subsample, metric, v = round(100 * mean_car, 1))],
+            method + subsample ~ metric, value.var = "v"), row.names = FALSE)
+infl <- pp[metric == "arith" & event_date >= 21,
+           .(design_effect = median(boot_se / se)),
            by = .(method, subsample)]
 cat("\nmedian SE inflation (block bootstrap / naive), horizons >= +21:\n")
 print(dcast(infl, method ~ subsample, value.var = "design_effect"),
@@ -163,13 +192,14 @@ cols <- c(Gsynth = "#2a78d6", SC = "#008300", APM = "#e87ba4")
 png(out_path("ma_longrun.png"), width = 2600, height = 1000, res = 240)
 par(mfrow = c(1, 3), mar = c(4, 4.2, 2.5, 5.5), mgp = c(2.4, 0.7, 0),
     las = 1)
-ylim <- 100 * range(pp$lo, pp$hi, finite = TRUE)
+pa <- pp[metric == "arith"]
+ylim <- 100 * range(pa$lo, pa$hi, finite = TRUE)
 for (s in c("Full sample", "Cash merger", "Stock merger")) {
   plot(NA, xlim = c(-1, 285), ylim = ylim, xlab = "Event day",
        ylab = if (s == "Full sample")
-         "Mean log CAR from day -1 (%)" else "",
+         "Mean additive CATT from day -1 (%)" else "",
        main = sprintf("%s (n=%s)", s,
-                      format(pp[subsample == s & event_date == 250 &
+                      format(pa[subsample == s & event_date == 250 &
                                   method == names(paths)[1], n],
                              big.mark = ",")),
        cex.main = 0.95, font.main = 1, bty = "n", xaxt = "n")
@@ -177,7 +207,7 @@ for (s in c("Full sample", "Cash merger", "Stock merger")) {
   grid(nx = NA, ny = NULL, col = "#d8d8d8", lty = 1, lwd = 0.5)
   abline(h = 0, col = "#9a9a9a", lwd = 0.7)
   for (m in names(paths)) {
-    x <- pp[method == m & subsample == s][order(event_date)]
+    x <- pa[method == m & subsample == s][order(event_date)]
     polygon(c(x$event_date, rev(x$event_date)),
             100 * c(x$lo, rev(x$hi)),
             col = grDevices::adjustcolor(cols[[m]], 0.15), border = NA)

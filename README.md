@@ -144,38 +144,39 @@ log CARs — checkpointed per announcement date and method (~75 minutes for
 refits match the paper's saved per-deal gsynth CARs at deal-level
 correlations 0.96 and 0.84, and both reproduce every subsample cell's sign
 and ordering. `ma_refit_longrun.R` extends the horizon to +250 trading
-days, where acquirers drift steadily negative after the announcement-day
-pop under every counterfactual — by +250 days, −23% (gsynth), −32% (apm),
-and −46% (sc) overall, with 100%-stock deals roughly twice as bad as
-100%-cash under each (`replication/output/ma_longrun.png`).
+days, reporting additive CATTs in simple returns — cumulated daily `att`,
+the paper's estimand. Acquirers drift negative after the announcement-day
+pop under every counterfactual, but how negative depends heavily on the
+counterfactual: −11% (gsynth), −32% (sc), −36% (apm) at +250 days, with
+100%-stock deals worse than 100%-cash under each
+(`replication/output/ma_longrun.png`).
 
-Two inference lessons come with the long horizon. First, deals cluster on
-announcement dates and 250-day windows overlap across deals announced
-within a year of each other, so naive cross-deal SEs are fiction:
-`ma_refit_longrun.R`'s default bands are a circular block bootstrap over
-announcement time (18-month blocks of announcement months, longer than
-the event window), and the implied design effects are 3–11× the naive
-SEs at horizons beyond a month. Second, the long-run *levels* are mostly
-design bias, not causal: `ma_placebo_check.R` re-runs the identical
-pipeline on one date-matched placebo non-acquirer per deal, and the
-placebo path itself drifts to −51% by +250 days (−44% cash-matched,
-−63% stock-matched). That drift decomposes into two artifacts. About
-21pp is volatility drag specific to the log-CAR metric (which the refit
-inherits from the paper's Table 6 construction): a sum of daily logs is
-a buy-and-hold return, and one volatile stock loses ~σ²/2 per day to
-Jensen's inequality against its diversified synthetic match. The
-remaining −31% survives in *arithmetic* CARs (cumulated simple-return
-`att`), where no drag is possible: measured daily simple returns of the
-synthetic are inflated relative to a single random stock, in the
-bid-ask-bounce pattern (Blume–Stambaugh) — the placebo bias is
-−19bp/day before decimalization vs −4bp/day after 2001 (peaking at
-−22bp/day in the 1990s), rises in the unit's volatility, and is already
-present in the out-of-sample pre-announcement days (−30..−2), where no
-treatment exists. Measured against that placebo benchmark, the
-announcement-window effect survives (treated sits outside the placebo
-95% band at short horizons in every subsample), cash acquirers modestly
-outperform their placebos over the first quarter, but the headline
-long-run drift is inside the placebo band almost everywhere
+Three inference lessons come with the long horizon. First, deals cluster
+on announcement dates and 250-day windows overlap across deals announced
+within a year of each other, so naive cross-deal SEs are fiction: the
+default bands are a circular block bootstrap over announcement time
+(18-month blocks of announcement months, longer than the event window),
+and the implied design effects are 2–11× the naive SEs at horizons
+beyond a month. Second, the metric matters: Table 6's short-window cells
+cumulate log1p of realized and predicted *simple* returns, which is
+immaterial over three days, but at +250 days that convention adds a
+per-day Jensen term whenever the counterfactual is smoother than the
+realization (log1p of a low-variance prediction loses none of the ~σ²/2
+per day a noisy realization does) — on the paper's own saved gsynth
+fits, −23% log versus −11% additive at +250 — so the long-run tables and
+figure use the additive CATT (the CSV carries both metrics). Third, even
+the additive CATT is not bias-free at long horizons:
+`ma_placebo_check.R` re-runs the identical pipeline on one date-matched
+placebo non-acquirer per deal, and the SC placebo path drifts to −30% by
++250 days with the bid-ask-bounce fingerprint (Blume–Stambaugh):
+−19bp/day before decimalization versus −4bp/day after 2001, increasing
+in the unit's volatility, and already present in the out-of-sample
+pre-announcement days (−30..−2), where no treatment exists — the
+synthetic's measured simple returns are inflated because the fit loads
+on volatile, wide-spread donors. Measured against the placebo benchmark,
+the announcement effect is unambiguous — treated is outside the placebo
+95% band at +1 and +21 in every subsample — while beyond a quarter the
+treated path is statistically indistinguishable from its placebo
 (`replication/output/ma_placebo_check.png`).
 
 ## Installation
