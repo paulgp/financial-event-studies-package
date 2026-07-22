@@ -157,14 +157,17 @@ within a year of each other, so naive cross-deal SEs are fiction: the
 default bands are a circular block bootstrap over announcement time
 (18-month blocks of announcement months, longer than the event window),
 and the implied design effects are 2–11× the naive SEs at horizons
-beyond a month. Second, the metric matters: Table 6's short-window cells
-cumulate log1p of realized and predicted *simple* returns, which is
-immaterial over three days, but at +250 days that convention adds a
-per-day Jensen term whenever the counterfactual is smoother than the
+beyond a month. Second, the metric matters: Table 6's cells cumulate
+log1p of realized and predicted *simple* returns, a convention that adds
+a per-day Jensen term whenever the counterfactual is smoother than the
 realization (log1p of a low-variance prediction loses none of the ~σ²/2
-per day a noisy realization does) — on the paper's own saved gsynth
-fits, −23% log versus −11% additive at +250 — so the long-run tables and
-figure use the additive CATT (the CSV carries both metrics). Third, even
+per day a noisy realization does). Shared across columns, it leaves the
+paper's method comparison intact, but it lowers levels even at 3 days
+(the published full-sample gsynth cell is 0.66; additive and
+buy-and-hold agree on ~1.04) and compounds at +250 days — on the paper's
+own saved gsynth fits, −23% log versus −11% additive — so the long-run
+tables and figure here use the additive CATT (the CSV carries both
+metrics). Third, even
 the additive CATT is not bias-free at long horizons:
 `ma_placebo_check.R` re-runs the identical pipeline on one date-matched
 placebo non-acquirer per deal, and the SC placebo path drifts to −30% by
