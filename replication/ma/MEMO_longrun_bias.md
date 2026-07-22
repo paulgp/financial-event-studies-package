@@ -1,0 +1,164 @@
+# Memo: CAR conventions, placebo drift, and long-run bias in the M&A application
+
+*2026-07-22 — feventr replication repo, `replication/ma/`. All numbers regenerate
+from the scripts cited at the end; paper references are to the 2025-12-28 draft.*
+
+## TL;DR
+
+1. **Table 6 is in the log-CAR convention while the draft's stated estimand
+   (Lemma 1) is the arithmetic ATT.** Under the stated estimand the 3-day cells
+   are Market **1.23** / Gsynth **1.04**, not 0.8 / 0.7 — the announcement
+   effect is ~50% larger. The arithmetic columns already exist in the saved
+   output files (`car_arith_vwret_1`, `car_arith_sc_1`).
+2. **A date-matched placebo (no deal, same pipeline) drifts to −30% additive
+   CATT at +250 days under SC.** The long-run drift in Figure 8 is therefore
+   mostly design bias, not treatment effect. The mechanism is *noise in
+   measured prices*, not factor misspecification: it collapses 5× at
+   decimalization, scales with unit volatility, and is present in pre-event
+   days.
+3. **The bias has a sign structure that explains Figure 8's fan**: the market
+   counterfactual is biased positive (treated-side noise), SC negative
+   (donor-side selection), gsynth mildest. At 252 days the market-adjusted CAR
+   is −12.9% in logs but **+3.1%** in arithmetic — the sign of acquirer
+   long-run "underperformance" vs the market depends on the cumulation
+   convention alone.
+4. **The close-contest (LaLonde) result gets a mechanical rationale**: contest
+   losers match winners on noise variance, so winner-minus-loser differences
+   the inflation out — exactly like treated-minus-placebo. Date-matched
+   placebos generalize that calibration to any event study.
+
+## 1. The three CAR conventions and what the code computes
+
+`sdc_ma_malmendier_gsynth.do` builds, per deal-day, from gsynth fit on simple
+returns (`daret ~ treated`, counterfactual `daret_sc` = Y.ct):
+
+| variable | construction | 3-day mean | 252-day mean |
+|---|---|---:|---:|
+| `car_arith_sc` | Σ daret_treated − Σ daret_sc (additive CATT) | **1.044%** | **−10.8%** |
+| `car_log_sc` | Σ log1p(daret_treated) − Σ log1p(daret_sc) | 0.658% | −23.5% |
+| `car_sc` | exp(Σlog)−1 differences (BHAR) | 1.040% | −62.1% |
+
+Market column (`sdc_ma_malmendier_canonical.do`): arithmetic **1.233%** /
+log 0.825% at 3 days; arithmetic **+3.1%** / log −12.9% at 252 days.
+
+- Table 6's published cells (0.8 / 0.7) are the **log** means. The browse
+  comments at `sdc_ma_malmendier_gsynth.do:409-414` show why the log version
+  was kept: the BHAR blows up at 252 days (deal-level range −84,451% to
+  +1,824%; one synthetic compounded exp(6.74) ≈ 847×), and log tames both
+  tails. But the log convention charges the noisy realized leg ~σ²/2 per day
+  that it does not charge the smooth predicted leg — a 0.38pp haircut already
+  at 3 days, growing linearly in horizon. At 3 days BHAR ≈ arithmetic (1.040
+  vs 1.044), so compounding is irrelevant there; the entire published-vs-
+  arithmetic gap is this Jensen term.
+- The method comparison inside Table 6 is unaffected (the haircut sits on the
+  common treated leg), but "difference less than 10 basis points" is 17-19bp
+  for the full sample under either convention.
+
+## 2. The placebo experiment and what it found
+
+`ma_refit_full.R MA_REFIT_PLACEBO=1` fits one **date-matched placebo
+non-acquirer** per deal (seeded, real acquirers excluded from every donor
+pool) through the identical SC pipeline: 7,052 announcement-date panels,
+complete-531-day-coverage universe, window −30..+250, est. window −280..−31.
+Fitted units and donors come from the same complete-coverage pool, so
+survivorship is symmetric by construction.
+
+Pooled placebo path at +250 days (full sample): **−51.9% log / −30.8%
+arithmetic**. The per-day arithmetic bias in `att`:
+
+| slice | placebo mean daily att |
+|---|---:|
+| 1977–2000 | −19 bp/day (peak 1990s: −22) |
+| 2001–2023 | −4.4 bp/day (2010s: −0.9) |
+| pre-event days −30..−2 (era 1) | −22 bp/day |
+| unit att-variance Q1 → Q4 (full sample) | −6 → −18 bp/day |
+| unit att-variance Q1 → Q5 within 2001+ | −2.4 → −6.2 bp/day |
+
+Against the placebo benchmark: the announcement effect is unambiguous
+(treated outside the placebo 95% band at +1 **and** +21 in every subsample;
+full-sample day +1: +0.83% treated vs −0.30% placebo, arithmetic), while
+beyond a quarter the treated path is statistically indistinguishable from its
+placebo (at +250: treated −32.1% vs placebo −30.2%). In the 2001+ subsample
+the announcement effect is +1.0–1.1% under all three methods (placebo −0.1%)
+and cash-merger SC lands exactly on its placebo (−10.9% both).
+
+## 3. Mechanism: noise in measured prices, not factor misspecification
+
+A measured daily simple return satisfies E[measured r] ≈ geometric drift +
+½·(real return variance) + (transitory-noise variance). The last term is
+Blume–Stambaugh (1983) generalized by Asparouhova–Bessembinder–Kalcheva (JF
+2013): *any* mean-reverting component of prices — bid-ask bounce, price
+pressure, stale quotes — inflates measured arithmetic means by its full
+variance. Two properties make it a counterfactual problem:
+
+- **Linearity preserves it and diversification does not remove it.** A
+  daily-rebalanced portfolio's expected return is the weighted average of its
+  constituents' inflated means. (Logs are immune in cumulation — the noise
+  telescopes to the endpoints.)
+- **SC selects on variance.** With ~4,000 donors and 250 pre-days, the
+  simplex loads on donors whose realized noise co-moved with the unit's —
+  disproportionately volatile, wide-spread names. A random unit has average
+  noise; its synthetic has above-average noise; `att` drifts negative every
+  day, in and out of sample.
+
+The fingerprints above (decimalization step, volatility gradient, presence in
+pre-event days, symmetry of survivorship) identify this channel and exclude
+factor misspecification, which has no reason to halve at 2001Q2. Post-2001
+the literal bounce is too small; the residual −4bp/day is the same formula
+with the remaining variance sources (transitory components + the real-vol
+σ²/2 wedge) — the within-2001+ volatility gradient confirms the variance link.
+
+**Sign structure by counterfactual** (explains Figure 8's fan ordering):
+
+| counterfactual | noise exposure | long-run bias sign |
+|---|---|---|
+| market index | treated-side only (index clean) | **positive** (arith +3.1% at 252d) |
+| gsynth | factors average 1000s of donors | mild negative (−10.8%) |
+| SC (simplex, n₀≫T₀) | donor-side, selected | **large negative** (placebo −30%) |
+| APM | noisy counterfactual path | large negative (−35.7%) |
+
+## 4. How this maps into the draft
+
+1. **Table 6**: report `car_arith_*` (already saved) or state the log
+   convention explicitly; reconciles the table with Lemma 1's "we focus on
+   estimating the arithmetic ATT." Cells become 1.2 / 1.0; adjust the
+   "<10bp" sentence (gap is ~19bp full-sample, still economically small).
+2. **Lemma 1 companion (measurement)**: BHAR needs variance-matched
+   counterfactuals; at daily frequency even the *arithmetic* ATT needs
+   noise-variance-matched counterfactuals. Bias = per-day noise-variance
+   differential × horizon; era-dependent (spreads), estimator-dependent
+   (selection). Cites: Blume–Stambaugh 1983; Asparouhova–Bessembinder–
+   Kalcheva 2010, 2013; (Canina–Michaely–Thaler–Womack 1998 for the daily
+   EW compounding cousin).
+3. **"When does bias accumulate" section**: this channel is an order of
+   magnitude larger at daily frequency (10–50%/yr for SC-style fits pre-2001)
+   than the misspecification illustration (~1.8% at 3 years); worth a
+   paragraph + the placebo as the diagnostic. Figure 7 already shows the
+   symptom: SC pre-period counterfactual 0.19pp/day vs treated 0.14pp/day.
+4. **Figure 8**: add the placebo path/band (or a 2001+ panel); the fan
+   ordering is predicted by the sign table above, not only by factor
+   misspecification.
+5. **Close contest**: one sentence on *why* it works — losers match winners
+   on noise variance, so the inflation differences out; date-matched placebos
+   generalize the calibration when no contest exists.
+6. **Inference**: deals cluster on dates and windows overlap; announcement-
+   time block bootstrap (18-month blocks) gives design effects 2–11× naive
+   cross-deal SEs at horizons ≥ +21.
+
+## 5. Repro pointers (this repo)
+
+| artifact | what |
+|---|---|
+| `ma/ma_refit_full.R` | 7,052-panel refit runner; `MA_REFIT_PLACEBO=1` for placebo fits |
+| `ma/ma_refit_longrun.R` | pooled paths, both metrics, block bootstrap → `output/ma_longrun_paths.csv`, `output/ma_longrun.png` |
+| `ma/ma_placebo_check.R` | placebo diagnostics → `output/ma_placebo_check.{csv,png}` |
+| `ma/ma_longrun_placebo_fig.R` | combined figure → `output/ma_longrun_placebo.png` |
+| `ma/ma_longrun_placebo_2001.R` | post-decimalization variant → `output/ma_longrun_placebo_2001.{csv,png}` |
+| commits | `556d986` (bootstrap + placebo), `45e56d2` (additive CATT switch), `4c7f50a` (2001+ figure) |
+
+Stata provenance: `M&A/code/sdc_ma_malmendier_gsynth.do` (~lines 127–137 log
+pass, 300–313 BHAR pass, 400–461 all-three pass + save), market column in
+`sdc_ma_malmendier_canonical.do`. gsynth is fit on simple returns
+(`daret ~ treated`); `daret_sc` is a smooth prediction of the simple return,
+which is why summing `log1p` of it re-introduces a Jensen term despite the
+additive (CATT) intent.
