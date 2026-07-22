@@ -156,12 +156,22 @@ within a year of each other, so naive cross-deal SEs are fiction:
 announcement time (18-month blocks of announcement months, longer than
 the event window), and the implied design effects are 3–11× the naive
 SEs at horizons beyond a month. Second, the long-run *levels* are mostly
-mechanical, not causal: `ma_placebo_check.R` re-runs the identical
+design bias, not causal: `ma_placebo_check.R` re-runs the identical
 pipeline on one date-matched placebo non-acquirer per deal, and the
 placebo path itself drifts to −51% by +250 days (−44% cash-matched,
-−63% stock-matched) — cumulated log returns of one volatile stock
-against a diversified synthetic portfolio lose roughly σ²/2 per day to
-volatility drag. Measured against that placebo benchmark, the
+−63% stock-matched). That drift decomposes into two artifacts. About
+21pp is volatility drag specific to the log-CAR metric (which the refit
+inherits from the paper's Table 6 construction): a sum of daily logs is
+a buy-and-hold return, and one volatile stock loses ~σ²/2 per day to
+Jensen's inequality against its diversified synthetic match. The
+remaining −31% survives in *arithmetic* CARs (cumulated simple-return
+`att`), where no drag is possible: measured daily simple returns of the
+synthetic are inflated relative to a single random stock, in the
+bid-ask-bounce pattern (Blume–Stambaugh) — the placebo bias is
+−19bp/day before decimalization vs −4bp/day after 2001 (peaking at
+−22bp/day in the 1990s), rises in the unit's volatility, and is already
+present in the out-of-sample pre-announcement days (−30..−2), where no
+treatment exists. Measured against that placebo benchmark, the
 announcement-window effect survives (treated sits outside the placebo
 95% band at short horizons in every subsample), cash acquirers modestly
 outperform their placebos over the first quarter, but the headline
