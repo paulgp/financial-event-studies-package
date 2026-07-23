@@ -36,7 +36,15 @@ stopifnot(all(methods %in% c("sc", "apm", "gsynth")))
 # placebo donor per deal (deterministic per-cohort draw, real acquirers
 # excluded from pools), storing the matched real deal for subsample tags.
 # Output goes to ma_refit_out/placebo_<method>/.
-placebo <- nzchar(Sys.getenv("MA_REFIT_PLACEBO", ""))
+# MA_REFIT_PLACEBO=runup: additionally match each placebo to its acquirer
+# by nearest estimation-window cumulative return (so placebos inherit the
+# acquirers' selection on pre-announcement runup — separates the
+# reversion-of-selection bias of intercept estimators from the mechanical
+# noise bias the random placebo measures). Deterministic; output goes to
+# ma_refit_out/placebo_runup_<method>/.
+placebo_env <- Sys.getenv("MA_REFIT_PLACEBO", "")
+placebo <- nzchar(placebo_env) && placebo_env != "0"
+match_runup <- identical(placebo_env, "runup")
 
 cat("loading inputs (CRSP daily is 4GB; a few minutes) ...\n")
 crsp <- as.data.table(read_dta(ma_work("crsp_daily_raw_2023_cleaned.dta"),
@@ -89,8 +97,27 @@ fit_cohort <- function(ix, ann, method) {
   if (placebo) {
     set.seed(1000000L + ix)
     cand <- setdiff(unique(pan$permno), tr_all)
-    fit_units <- sample(cand, min(length(tr_all), length(cand)))
-    matched <- tr_all[seq_along(fit_units)]
+    if (match_runup) {
+      # one placebo per acquirer WITH complete coverage (its runup must be
+      # computable), nearest-neighbor on est-window cumulative return,
+      # without replacement within the cohort
+      cr <- pan[event_date >= -280L & event_date <= -31L,
+                .(cr = sum(daret)), by = permno]
+      crv <- setNames(cr$cr, cr$permno)
+      fit_units <- character(0)
+      matched <- character(0)
+      pool <- cand
+      for (tr0 in tr_in) {
+        if (!length(pool)) break
+        pick <- pool[which.min(abs(crv[pool] - crv[[tr0]]))]
+        fit_units <- c(fit_units, pick)
+        matched <- c(matched, tr0)
+        pool <- setdiff(pool, pick)
+      }
+    } else {
+      fit_units <- sample(cand, min(length(tr_all), length(cand)))
+      matched <- tr_all[seq_along(fit_units)]
+    }
     donors_fit <- setdiff(donors, fit_units)
   } else {
     fit_units <- tr_all
@@ -138,7 +165,8 @@ fit_cohort <- function(ix, ann, method) {
 
 for (method in methods) {
   outdir <- file.path("ma", "ma_refit_out",
-                      paste0(if (placebo) "placebo_" else "", method))
+                      paste0(if (match_runup) "placebo_runup_"
+                             else if (placebo) "placebo_" else "", method))
   dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
   # MA_REFIT_MAX_NEW=n caps the number of not-yet-checkpointed cohorts this
   # invocation fits, so a run can be sized to finish inside a time budget
