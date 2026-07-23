@@ -45,6 +45,21 @@ stopifnot(all(methods %in% c("sc", "apm", "gsynth")))
 placebo_env <- Sys.getenv("MA_REFIT_PLACEBO", "")
 placebo <- nzchar(placebo_env) && placebo_env != "0"
 match_runup <- identical(placebo_env, "runup")
+# MA_REFIT_DEMEAN=1: SC-with-intercept (Doudchenko-Imbens / Ferman-Pinto) —
+# demean every unit's daret by its estimation-window mean before fitting.
+# Kills any stationary unit-level mean gap (noise inflation AND alpha; the
+# two are not separable here — see MEMO_longrun_bias.md). att stays a
+# simple-return gap; car_log is on demeaned returns (do not interpret its
+# level). Output prefix demean_.
+demean <- nzchar(Sys.getenv("MA_REFIT_DEMEAN", ""))
+# MA_REFIT_ABK=1: Asparouhova-Bessembinder-Kalcheva prior-gross-return
+# weighted counterfactual — same fitted SC weights, but
+# y0hat_t = sum_j w_j (1+r_{j,t-1}) r_{jt} / sum_j w_j (1+r_{j,t-1}),
+# which purges each donor's price-noise inflation to first order while
+# keeping the fixed-loading estimand (weights drift one day, not
+# cumulatively). att/car_log recomputed from the ABK counterfactual.
+# Output prefix abk_.
+abk <- nzchar(Sys.getenv("MA_REFIT_ABK", ""))
 
 cat("loading inputs (CRSP daily is 4GB; a few minutes) ...\n")
 crsp <- as.data.table(read_dta(ma_work("crsp_daily_raw_2023_cleaned.dta"),
@@ -91,6 +106,10 @@ fit_cohort <- function(ix, ann, method) {
   pan <- merge(pan, days[, .(date, event_date)], by = "date")
   pan[is.na(daret), daret := 0]
   pan[, permno := as.character(permno)]
+  if (demean)
+    pan[, daret := daret -
+          mean(daret[event_date >= -280L & event_date <= -31L]),
+        by = permno]
   tr_all <- as.character(pdix[date_index == ix, permno])
   tr_in <- intersect(tr_all, unique(pan$permno))
   donors <- setdiff(unique(pan$permno), tr_all)
@@ -143,10 +162,31 @@ fit_cohort <- function(ix, ann, method) {
       # full per-deal path (one row per event day, like the original
       # stacked gsynth output): att and the cumulative log CAR from -30;
       # horizon CARs from -1 are path differences vs event_date == -2
+      days_v <- as.integer(names(f$car))
+      att_v <- as.numeric(f$att)
+      car_v <- as.numeric(f$car)
+      if (abk) {
+        w <- f$weights$omega
+        w <- w[w > 1e-10]
+        dsub <- pan[permno %in% names(w) & event_date >= -31L,
+                    .(permno, event_date, daret)]
+        setorder(dsub, permno, event_date)
+        dsub[, glag := 1 + data.table::shift(daret), by = permno]
+        dsub <- dsub[event_date >= -30L]
+        dsub[, wj := w[permno]]
+        y0 <- dsub[, .(y0hat = sum(wj * glag * daret) / sum(wj * glag)),
+                   by = event_date]
+        m <- merge(pan[permno == tr & event_date >= -30L,
+                       .(event_date, daret)], y0, by = "event_date")
+        setorder(m, event_date)
+        stopifnot(identical(as.integer(m$event_date), days_v))
+        att_v <- m$daret - m$y0hat
+        car_v <- cumsum(log1p(m$daret) - log1p(m$y0hat))
+      }
       data.table(date_index = ix, ann_tdate = ann, permno = tr,
                  matched_permno = matched[k],
-                 event_date = as.integer(names(f$car)),
-                 att = as.numeric(f$att), car_log = as.numeric(f$car),
+                 event_date = days_v,
+                 att = att_v, car_log = car_v,
                  n_units = length(donors_fit) + 1L,
                  n_treated_date = length(tr_all),
                  r = f$diagnostics$info$r %||% NA_integer_,
@@ -166,7 +206,9 @@ fit_cohort <- function(ix, ann, method) {
 for (method in methods) {
   outdir <- file.path("ma", "ma_refit_out",
                       paste0(if (match_runup) "placebo_runup_"
-                             else if (placebo) "placebo_" else "", method))
+                             else if (placebo) "placebo_" else "",
+                             if (demean) "demean_" else "",
+                             if (abk) "abk_" else "", method))
   dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
   # MA_REFIT_MAX_NEW=n caps the number of not-yet-checkpointed cohorts this
   # invocation fits, so a run can be sized to finish inside a time budget
