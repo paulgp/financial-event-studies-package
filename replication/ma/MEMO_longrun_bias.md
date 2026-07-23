@@ -98,7 +98,14 @@ variance. Two properties make it a counterfactual problem:
 - **Linearity preserves it and diversification does not remove it.** A
   daily-rebalanced portfolio's expected return is the weighted average of its
   constituents' inflated means. (Logs are immune in cumulation — the noise
-  telescopes to the endpoints.)
+  telescopes to the endpoints.) This is the "Caveat Compounder" warning of
+  Canina, Michaely, Thaler & Womack (JF 1998) — the daily CRSP EW index is an
+  implicitly daily-rebalanced portfolio whose measured return is inflated
+  ~6%/yr by bounce and nonsynchronous trading — transplanted to synthetic
+  counterfactuals: Σw·r is exactly such a portfolio, and the SC fit is worse
+  than the EW index (−19bp/day ≈ 48%/yr pre-2001 vs their ~2bp/day) because
+  weight optimization *selects into* the bias rather than merely averaging
+  over it.
 - **SC selects on variance.** With ~4,000 donors and 250 pre-days, the
   simplex loads on donors whose realized noise co-moved with the unit's —
   disproportionately volatile, wide-spread names. A random unit has average
@@ -131,9 +138,19 @@ with the remaining variance sources (transitory components + the real-vol
    counterfactuals; at daily frequency even the *arithmetic* ATT needs
    noise-variance-matched counterfactuals. Bias = per-day noise-variance
    differential × horizon; era-dependent (spreads), estimator-dependent
-   (selection). Cites: Blume–Stambaugh 1983; Asparouhova–Bessembinder–
-   Kalcheva 2010, 2013; (Canina–Michaely–Thaler–Womack 1998 for the daily
-   EW compounding cousin).
+   (selection). Cites: Blume & Stambaugh (JFE 1983); Asparouhova,
+   Bessembinder & Kalcheva (JFE 2010; JF 2013, "Noisy Prices and Inference
+   Regarding Returns"); Canina, Michaely, Thaler & Womack (JF 1998),
+   "Caveat Compounder: A Warning about Using the Daily CRSP Equal-Weighted
+   Index to Compute Long-Run Excess Returns",
+   doi:10.1111/0022-1082.165353 — the direct antecedent: our SC placebo
+   drift is their daily-rebalancing bias with an optimized (and therefore
+   noise-selected) portfolio in place of the EW index. The literature's
+   response (Barber & Lyon JFE 1997 control firms; Lyon, Barber & Tsai JF
+   1999 buy-and-hold benchmarks) anticipates the fix: a matched single-firm
+   benchmark carries the same inflation and differences it out — the
+   control-firm logic our placebo/close-contest/intercept results restate
+   in causal-inference terms.
 3. **"When does bias accumulate" section**: this channel is an order of
    magnitude larger at daily frequency (10–50%/yr for SC-style fits pre-2001)
    than the misspecification illustration (~1.8% at 3 years); worth a
