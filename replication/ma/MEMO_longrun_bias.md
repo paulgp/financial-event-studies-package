@@ -12,14 +12,27 @@ from the scripts cited at the end; paper references are to the 2025-12-28 draft.
    output files (`car_arith_vwret_1`, `car_arith_sc_1`).
 2. **A date-matched placebo (no deal, same pipeline) drifts to −30% additive
    CATT at +250 days under SC — but the *same placebo units* under gsynth
-   drift +0.7%.** SC's long-run drift is design bias; gsynth's is signal:
-   against its near-zero placebo band the treated gsynth path is outside at
-   595/690 horizons ≥ +21, so the long-run acquirer underperformance (−10.8%
-   overall, −19.5% stock, −5.5% cash at +250) is real under a diversified
-   factor counterfactual — at magnitudes well below the BHAR literature. The
-   SC bias mechanism is *noise in measured prices*, not factor
+   drift +0.7%.** SC's long-run drift is design bias; gsynth's survives that
+   test. The SC bias mechanism is *noise in measured prices*, not factor
    misspecification: it collapses 5× at decimalization, scales with unit
    volatility, and is present in pre-event days.
+2a. **But a second confound — runup reversion (Ashenfelter dip) — takes out
+   over half of gsynth's remaining long-run effect.** Placebos matched to
+   their acquirers on estimation-window cumulative return revert −5.8%
+   [−9.5, −2.4] by +250d under the gsynth design (random placebos: +0.7),
+   because the unit FE carries a transient hot pre-mean forward; reversion
+   is −12.7% for stock-deal-sized runups. The corrected long-run effect
+   (treated − runup placebo): **−5.0% [−7.5, −2.4] full sample, −6.8 stock,
+   −3.9 cash** — half the naive gsynth −10.8/−19.5/−5.5, still
+   significantly negative, cash/stock ratio narrows from 3.5× to ~1.7×.
+   This reconciles the designs: SC's placebo-calibrated estimate is −1.9
+   [−4.0, +0.1], overlapping gsynth's corrected −5.0 — both point to a
+   modest −2 to −5% one-year drift, far below the BHAR-literature
+   magnitudes. The announcement effect is untouched by every correction:
+   ~+1.1 [0.8, 1.4] under both designs, placebo-calibrated. The two-placebo
+   decomposition (random = mechanical bias; runup-matched − random =
+   selection reversion) is the general-purpose diagnostic; the close
+   contest gets both implicitly because losers share runup and noise.
 3. **The bias has a sign structure that explains Figure 8's fan**: the market
    counterfactual is biased positive (treated-side noise), SC negative
    (donor-side selection), gsynth mildest. At 252 days the market-adjusted CAR
@@ -240,6 +253,9 @@ with the remaining variance sources (transitory components + the real-vol
 | `ma/ma_refit_longrun.R` | pooled paths, both metrics, block bootstrap → `output/ma_longrun_paths.csv`, `output/ma_longrun.png` |
 | `ma/ma_placebo_check.R` | SC placebo diagnostics → `output/ma_placebo_check.{csv,png}` |
 | `ma/ma_placebo_gsynth.R` | gsynth placebo (same seeded units) vs published treated → `output/ma_placebo_gsynth.{csv,png}` |
+| `ma/ma_runup_check.R` | runup-matched vs random gsynth placebos; reversion + corrected effect with CIs → `output/ma_runup_check.{csv,png}` |
+| `ma/ma_placebo_calibrated.R` | placebo-calibrated CATT (treated − placebo, replicate-level CIs) → `output/ma_placebo_calibrated.{csv,png}` |
+| `ma_refit_full.R` knobs | `MA_REFIT_PLACEBO=runup` (runup-matched placebos), `MA_REFIT_DEMEAN=1` (SC-with-intercept), `MA_REFIT_ABK=1` (prior-gross-return weighted counterfactual) |
 | `ma/ma_longrun_placebo_fig.R` | combined figure → `output/ma_longrun_placebo.png` |
 | `ma/ma_longrun_placebo_2001.R` | post-decimalization variant → `output/ma_longrun_placebo_2001.{csv,png}` |
 | commits | `556d986` (bootstrap + placebo), `45e56d2` (additive CATT switch), `4c7f50a` (2001+ figure) |
