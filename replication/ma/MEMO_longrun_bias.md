@@ -86,7 +86,50 @@ placebo (at +250: treated −32.1% vs placebo −30.2%). In the 2001+ subsample
 the announcement effect is +1.0–1.1% under all three methods (placebo −0.1%)
 and cash-merger SC lands exactly on its placebo (−10.9% both).
 
-## 3. Mechanism: noise in measured prices, not factor misspecification
+## 3a. The two-channel framing (the organizing frame for the long-run section)
+
+Two distinct variance complications operate in long-run event studies — Jensen
+terms at two different transformations. **The standing estimand convention is
+arithmetic (additive CATT) precisely because it eliminates the unfixable
+channel and leaves the fixable one.**
+
+**Channel 1 — metric level (Lemma 1).** return → log(1+return) is concave:
+E[log(1+R)] ≈ E[R] − Var(R)/2. Geometric/BHAR estimands need the
+counterfactual matched on *return variance* as well as expected return —
+impossible for a diversified portfolio against a single stock, and with no
+theoretical guidance for constructing a variance-matched portfolio. Vanishes
+entirely under arithmetic estimands (sums are linear). **No good fix; avoid
+the channel by choosing the arithmetic estimand.**
+
+**Channel 2 — measurement level.** price → return is convex in the price
+level: with observed price = value·(1+ε), ε transitory,
+E[measured simple return] ≈ E[true return] + Var(ε). Variance *in prices*
+manufactures mean return with no change in value, sits inside each daily
+mean, and so accumulates faithfully under addition — the arithmetic estimand
+is exposed whenever the two legs differ in price-noise variance (bid-ask
+bounce in volatile stocks). **Its sign is design-dependent** — it runs
+against whichever leg is cleaner: treated stock vs noise-free index →
+spurious positive drift (+3.1% at 252d, market arithmetic); noise-selected
+synthetic vs random unit → spurious negative drift (−30% SC placebo). That
+sign structure is Figure 8's fan. **Fixable while keeping the arithmetic
+estimand**: the inflation is a stationary unit-level constant, so unit
+intercepts/differencing (gsynth FE, SDID, DID), matched single-firm
+benchmarks (control firms, contest losers, placebos), ABK noise-robust
+weighting, or coarser frequency all remove it.
+
+Caution for paper text: do NOT state the converse "logs escape channel 2"
+unqualified. The telescoping immunity holds only for a buy-and-hold leg's own
+cumulated log return; any counterfactual leg built from daily *simple*
+returns (a rebalanced portfolio, a prediction that gets log1p'd) re-imports
+the noise inflation each day. Logs trade channel 2 for channel 1 only in the
+matched-single-firm case — where neither channel was a problem to begin with.
+
+Empirical map: the ~21pp log-vs-arithmetic gap in the SC placebo at +250d is
+channel 1; the −31pp surviving in arithmetic is channel 2 (plus its σ²/2
+donor-selection cousin); the decimalization collapse dates channel 2's
+microstructure core.
+
+## 3b. Mechanism detail: noise in measured prices, not factor misspecification
 
 A measured daily simple return satisfies E[measured r] ≈ geometric drift +
 ½·(real return variance) + (transitory-noise variance). The last term is
