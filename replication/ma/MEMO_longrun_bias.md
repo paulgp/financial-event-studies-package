@@ -129,6 +129,29 @@ channel 1; the −31pp surviving in arithmetic is channel 2 (plus its σ²/2
 donor-selection cousin); the decimalization collapse dates channel 2's
 microstructure core.
 
+**Channel 2 decomposes further (the treated-cross-section question).** Piece
+A, *selection amplification*: with one treated firm per event and n₀ ≫ T₀,
+the fit must track one noisy path and recruits high-variance donors to
+interpolate its wiggles — this is what makes SC's bias (−30% placebo) far
+exceed a naive EW benchmark's. A treated cross-section of N firms shrinks
+the target's idiosyncratic noise like 1/√N and kills the selection channel;
+gsynth is effectively a many-firm design even at N=1 (its factors average
+thousands of donors), which is why its placebo is clean. Piece B, *level
+mismatch*: noise inflation sits in each firm's MEAN, and means do not
+diversify — a portfolio of N treated firms still carries its constituents'
+average inflation (CMTW's EW index: thousands of firms, still ~6%/yr). Many
+firms converts the bias from an unestimable firm-specific quantity into a
+stable composition quantity, matchable on observables (size/price/vol/
+liquidity) or removable with an intercept — but does not eliminate it.
+Two corollaries: (i) pooling across many single-treated EVENTS is NOT
+equivalent — the selection tilt is systematic across events, so it survives
+pooling (hence the pooled placebo at −13bp/day, not zero); pooling buys
+precision, not bias reduction. (ii) Calendar-time portfolios kill piece A by
+construction but keep piece B when equal-weighted — ABK's gross-return
+weighting targets exactly that residual. Full recipe: aggregate the treated
+side (kills A), then match/weight/intercept away composition inflation
+(kills B), subject to the runup-persistence caveat for intercepts.
+
 ## 3b. Mechanism detail: noise in measured prices, not factor misspecification
 
 A measured daily simple return satisfies E[measured r] ≈ geometric drift +
