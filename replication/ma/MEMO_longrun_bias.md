@@ -11,11 +11,15 @@ from the scripts cited at the end; paper references are to the 2025-12-28 draft.
    effect is ~50% larger. The arithmetic columns already exist in the saved
    output files (`car_arith_vwret_1`, `car_arith_sc_1`).
 2. **A date-matched placebo (no deal, same pipeline) drifts to −30% additive
-   CATT at +250 days under SC.** The long-run drift in Figure 8 is therefore
-   mostly design bias, not treatment effect. The mechanism is *noise in
-   measured prices*, not factor misspecification: it collapses 5× at
-   decimalization, scales with unit volatility, and is present in pre-event
-   days.
+   CATT at +250 days under SC — but the *same placebo units* under gsynth
+   drift +0.7%.** SC's long-run drift is design bias; gsynth's is signal:
+   against its near-zero placebo band the treated gsynth path is outside at
+   595/690 horizons ≥ +21, so the long-run acquirer underperformance (−10.8%
+   overall, −19.5% stock, −5.5% cash at +250) is real under a diversified
+   factor counterfactual — at magnitudes well below the BHAR literature. The
+   SC bias mechanism is *noise in measured prices*, not factor
+   misspecification: it collapses 5× at decimalization, scales with unit
+   volatility, and is present in pre-event days.
 3. **The bias has a sign structure that explains Figure 8's fan**: the market
    counterfactual is biased positive (treated-side noise), SC negative
    (donor-side selection), gsynth mildest. At 252 days the market-adjusted CAR
@@ -151,7 +155,8 @@ with the remaining variance sources (transitory components + the real-vol
 |---|---|
 | `ma/ma_refit_full.R` | 7,052-panel refit runner; `MA_REFIT_PLACEBO=1` for placebo fits |
 | `ma/ma_refit_longrun.R` | pooled paths, both metrics, block bootstrap → `output/ma_longrun_paths.csv`, `output/ma_longrun.png` |
-| `ma/ma_placebo_check.R` | placebo diagnostics → `output/ma_placebo_check.{csv,png}` |
+| `ma/ma_placebo_check.R` | SC placebo diagnostics → `output/ma_placebo_check.{csv,png}` |
+| `ma/ma_placebo_gsynth.R` | gsynth placebo (same seeded units) vs published treated → `output/ma_placebo_gsynth.{csv,png}` |
 | `ma/ma_longrun_placebo_fig.R` | combined figure → `output/ma_longrun_placebo.png` |
 | `ma/ma_longrun_placebo_2001.R` | post-decimalization variant → `output/ma_longrun_placebo_2001.{csv,png}` |
 | commits | `556d986` (bootstrap + placebo), `45e56d2` (additive CATT switch), `4c7f50a` (2001+ figure) |

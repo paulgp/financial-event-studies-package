@@ -176,11 +176,19 @@ placebo non-acquirer per deal, and the SC placebo path drifts to −30% by
 in the unit's volatility, and already present in the out-of-sample
 pre-announcement days (−30..−2), where no treatment exists — the
 synthetic's measured simple returns are inflated because the fit loads
-on volatile, wide-spread donors. Measured against the placebo benchmark,
-the announcement effect is unambiguous — treated is outside the placebo
-95% band at +1 and +21 in every subsample — while beyond a quarter the
-treated path is statistically indistinguishable from its placebo
-(`replication/output/ma_placebo_check.png`).
+on volatile, wide-spread donors. The same placebo units run through the
+gsynth pipeline (`ma_placebo_gsynth.R`) show essentially no drift at
+all — +0.7% at +250 days — so the bias is a property of the
+counterfactual's construction, not of the placebo design. Judged
+against its own method-matched null
+(`replication/output/ma_longrun_placebo.png`): the announcement effect
+is unambiguous under every method (treated outside the placebo band at
++1 in all subsamples), SC's long-run drift is indistinguishable from
+its placebo, but gsynth's is not — the treated gsynth path sits outside
+its near-zero placebo band at almost every horizon, so the long-run
+acquirer underperformance (−11% overall, −19% for 100%-stock deals) is
+signal under a diversified factor counterfactual, at magnitudes well
+below the classic BHAR-literature estimates.
 
 ## Installation
 
