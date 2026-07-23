@@ -245,6 +245,28 @@ with the remaining variance sources (transitory components + the real-vol
    time block bootstrap (18-month blocks) gives design effects 2–11× naive
    cross-deal SEs at horizons ≥ +21.
 
+**Prototype outcomes** (`ma_fix_check.R`; placebo drift, full sample,
+additive CATT, 95% CI at +250d; per-day bias pre-2001 / post):
+
+| design | +250d placebo drift | bp/day pre-2001 / post |
+|---|---|---|
+| SC baseline (fixed weights, no fix) | −30.2 [−39.8, −19.0] | −18.6 / −4.4 |
+| SC + intercept (est-window demeaning) | +2.0 [−5.0, +9.3] | +0.1 / +2.2 |
+| SC + ABK weighting (donor leg purged) | −3.3 [−9.8, +1.7] | −1.5 / −1.1 |
+| Gsynth (unit FE + factor averaging) | +0.7 [−1.4, +3.1] | +0.3 / +0.3 |
+
+Both estimand-preserving fixes eliminate the bias — a one-line demeaning or
+a one-day gross-return reweighting each removes ~95% of a 30pp/yr drift.
+One surprise refines the mechanism: ABK was predicted to land *positive*
+(it purges only the donor leg, leaving the unit's own inflation), but it
+lands at ≈0 — so a random complete-coverage stock's own noise inflation is
+small (~1–2bp/day; the 531-day-presence screen drops the extreme-noise
+tail), and the baseline SC bias was almost entirely **piece-A selection**
+of high-noise donors rather than the level of typical-stock noise. The
+placebo-validated menu for long-horizon SC at daily frequency is
+therefore: intercept, ABK weighting, or switch to a factor-averaged
+counterfactual — all three now demonstrated equivalent on the null.
+
 ## 5. Repro pointers (this repo)
 
 | artifact | what |
@@ -256,6 +278,7 @@ with the remaining variance sources (transitory components + the real-vol
 | `ma/ma_runup_check.R` | runup-matched vs random gsynth placebos; reversion + corrected effect with CIs → `output/ma_runup_check.{csv,png}` |
 | `ma/ma_placebo_calibrated.R` | placebo-calibrated CATT (treated − placebo, replicate-level CIs) → `output/ma_placebo_calibrated.{csv,png}` |
 | `ma_refit_full.R` knobs | `MA_REFIT_PLACEBO=runup` (runup-matched placebos), `MA_REFIT_DEMEAN=1` (SC-with-intercept), `MA_REFIT_ABK=1` (prior-gross-return weighted counterfactual) |
+| `ma/ma_fix_check.R` | four-placebo comparison of the fixes → `output/ma_fix_check.{csv,png}` |
 | `ma/ma_longrun_placebo_fig.R` | combined figure → `output/ma_longrun_placebo.png` |
 | `ma/ma_longrun_placebo_2001.R` | post-decimalization variant → `output/ma_longrun_placebo_2001.{csv,png}` |
 | commits | `556d986` (bootstrap + placebo), `45e56d2` (additive CATT switch), `4c7f50a` (2001+ figure) |
