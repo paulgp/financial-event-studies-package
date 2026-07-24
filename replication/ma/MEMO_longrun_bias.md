@@ -156,7 +156,12 @@ small — while monthly gsynth's placebo is clean (−1.7 [−6.9, +4.1] at
 +36m), because a unit intercept kills BOTH members (both are stationary
 unit-level mean wedges). Practical rule: frequency choice mitigates the
 noise member only; variance-selected counterfactuals need an intercept (or
-factor averaging) at ANY frequency.
+factor averaging) at ANY frequency. ABK weighting behaves the same way:
+applied to the monthly-SC placebo it removes ~40% of the 3-year drift
+(−22.5 → −13.6 at +36m; monthly-fit weights select extreme-noise donors,
+so member (i) is not negligible even at 12 touches/yr) but leaves the
+convexity member intact — it corrects measurement, not the σ²/2 property
+of true simple returns.
 
 **Channel 2 decomposes further (the treated-cross-section question).** Piece
 A, *selection amplification*: with one treated firm per event and n₀ ≫ T₀,
