@@ -142,6 +142,22 @@ channel 1; the −31pp surviving in arithmetic is channel 2 (plus its σ²/2
 donor-selection cousin); the decimalization collapse dates channel 2's
 microstructure core.
 
+**Channel 2 has two members with different frequency scaling** (established
+by the monthly 3-year build, `ma_monthly_longrun.R`): (i) *transitory-noise
+inflation* Var(ε) is billed once per price touch, so monthly evaluation
+cuts it ~21× — the member the decimalization test dates; (ii) the
+*real-volatility convexity wedge* σ²_period/2 scales with the period
+length (σ²_month ≈ 21·σ²_day), so per unit of calendar time it is
+**frequency-invariant** — switching to monthly data does not touch it.
+Evidence: the monthly-SC random placebo still drifts −22.5% by +36m and
+the hybrid (daily-fit weights, monthly evaluation) −20.6% — the hybrid
+fixes only member (i), which the complete-coverage screen had already made
+small — while monthly gsynth's placebo is clean (−1.7 [−6.9, +4.1] at
++36m), because a unit intercept kills BOTH members (both are stationary
+unit-level mean wedges). Practical rule: frequency choice mitigates the
+noise member only; variance-selected counterfactuals need an intercept (or
+factor averaging) at ANY frequency.
+
 **Channel 2 decomposes further (the treated-cross-section question).** Piece
 A, *selection amplification*: with one treated firm per event and n₀ ≫ T₀,
 the fit must track one noisy path and recruits high-variance donors to
@@ -279,6 +295,25 @@ counterfactual — all three now demonstrated equivalent on the null.
 | `ma/ma_placebo_calibrated.R` | placebo-calibrated CATT (treated − placebo, replicate-level CIs) → `output/ma_placebo_calibrated.{csv,png}` |
 | `ma_refit_full.R` knobs | `MA_REFIT_PLACEBO=runup` (runup-matched placebos), `MA_REFIT_DEMEAN=1` (SC-with-intercept), `MA_REFIT_ABK=1` (prior-gross-return weighted counterfactual) |
 | `ma/ma_fix_check.R` | four-placebo comparison of the fixes → `output/ma_fix_check.{csv,png}` |
+| `ma/wrds_monthly_pull.R` | CRSP monthly 1974–2024 from WRDS (delist-adjusted) → Dropbox work dir |
+| `ma/ma_refit_monthly.R` | monthly-frequency runner, −36..+36 months, 488 announcement-month cohorts, same knobs |
+| `ma/ma_refit_hybrid.R` | daily-fit SC weights, monthly evaluation; placebo knobs |
+| `ma/ma_monthly_longrun.R` | 3-year results, 9 columns → `output/ma_monthly_longrun.{csv,png}` |
+
+**Three-year (literature-horizon) results, full sample, additive CATT [95% CI]:**
+under the cleanest design (monthly gsynth), the raw treated drift at +36m is
+−25.7 [−35.9, −15.5], of which the runup-matched placebo reverts −21.7
+[−31.1, −12.9] — so the **corrected 3-year effect is −4.1 [−9.3, +2.0],
+statistically zero** at exactly the horizon where Rau–Vermaelen report −4%
+(significant) and Loughran–Vijh −25% for stock mergers. Monthly-SC corrected
+is marginally negative (−5.8 [−10.4, −1.4]); the hybrid's corrected numbers
+are wide and unstable (its own placebo drift is large, so the correction
+differences two big numbers). The announcement quarter is +1.4 [0.4, 2.5]
+under every design. Reading for the draft: at 3 years the classic long-run
+merger underperformance decomposes as ≈0 mechanical (with an intercept
+design) + ≈−22pp runup reversion + ≈−4pp residual deal effect (n.s.);
+MMP's winner-loser −24% remains the honest upper bound among
+quasi-experimental designs (contested-deal subsample).
 | `ma/ma_longrun_placebo_fig.R` | combined figure → `output/ma_longrun_placebo.png` |
 | `ma/ma_longrun_placebo_2001.R` | post-decimalization variant → `output/ma_longrun_placebo_2001.{csv,png}` |
 | commits | `556d986` (bootstrap + placebo), `45e56d2` (additive CATT switch), `4c7f50a` (2001+ figure) |
