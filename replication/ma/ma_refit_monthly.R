@@ -32,6 +32,11 @@ placebo_env <- Sys.getenv("MA_REFIT_PLACEBO", "")
 placebo <- nzchar(placebo_env) && placebo_env != "0"
 match_runup <- identical(placebo_env, "runup")
 demean <- nzchar(Sys.getenv("MA_REFIT_DEMEAN", ""))
+# MA_REFIT_ABK=1 (method sc only): prior-gross-return weighted
+# counterfactual from the fitted weights — purges transitory-noise
+# inflation (channel-2 member i) but by construction NOT the real-vol
+# convexity wedge (member ii); see MEMO_longrun_bias.md.
+abk <- nzchar(Sys.getenv("MA_REFIT_ABK", ""))
 
 cat("loading monthly CRSP ...\n")
 mo <- fread(ma_work("crsp_monthly_wrds_1974_2024.csv.gz"))
@@ -116,9 +121,30 @@ fit_cohort <- function(aix) {
                        est_window = c(-36, -2), returns = "simple",
                        cumulate = "log", se = "none", keep_data = FALSE,
                        donors = donors_fit)
+      days_v <- as.integer(names(f$car))
+      att_v <- as.numeric(f$att)
+      car_v <- as.numeric(f$car)
+      if (abk) {
+        w <- f$weights$omega
+        w <- w[w > 1e-10]
+        dsub <- pan[permno %in% names(w) & event_month >= -2L,
+                    .(permno, event_month, ret)]
+        setorder(dsub, permno, event_month)
+        dsub[, glag := 1 + data.table::shift(ret), by = permno]
+        dsub <- dsub[event_month >= -1L]
+        dsub[, wj := w[permno]]
+        y0 <- dsub[, .(y0hat = sum(wj * glag * ret) / sum(wj * glag)),
+                   by = event_month]
+        m <- merge(pan[permno == tr & event_month >= -1L,
+                       .(event_month, ret)], y0, by = "event_month")
+        setorder(m, event_month)
+        stopifnot(identical(as.integer(m$event_month), days_v))
+        att_v <- m$ret - m$y0hat
+        car_v <- cumsum(log1p(m$ret) - log1p(m$y0hat))
+      }
       data.table(ann_month = am, permno = tr, matched_permno = matched[k],
-                 event_month = as.integer(names(f$car)),
-                 att = as.numeric(f$att), car_log = as.numeric(f$car),
+                 event_month = days_v,
+                 att = att_v, car_log = car_v,
                  n_units = length(donors_fit) + 1L,
                  n_treated_month = length(tr_all),
                  r = f$diagnostics$info$r %||% NA_integer_,
@@ -137,7 +163,8 @@ outdir <- file.path("ma", "ma_refit_out",
                     paste0("monthly_",
                            if (match_runup) "placebo_runup_"
                            else if (placebo) "placebo_" else "",
-                           if (demean) "demean_" else "", method))
+                           if (demean) "demean_" else "",
+                           if (abk) "abk_" else "", method))
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 have <- file.exists(file.path(outdir, sprintf("cohort_%s.csv",
                                               months_all[cohorts])))
